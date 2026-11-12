@@ -74,6 +74,73 @@ const initialFincas = [
 
 
 const initialLotes = [
+  // Finca Las Palmas (ter-1)
+  {
+    id: 'lot-p1',
+    terrenoId: 'ter-1',
+    identificador: 'Lote P1 - Cafetal Alto',
+    cultivoNombre: 'Café Geisha',
+    area: 35.0,
+    estado: 'Saludable',
+    humedadSuelo: 64,
+    sensoresCount: 6,
+    ultimaActualizacion: 'hoy 11:15',
+    tipoSuelo: 'Franco-Arcilloso',
+    color: '#22c55e',
+    notas: 'Café especial de altura con microclima óptimo.',
+    polygon: '130,220 290,190 330,280 170,320',
+    labelPos: 'top-[44%] left-[24%]'
+  },
+  {
+    id: 'lot-p2',
+    terrenoId: 'ter-1',
+    identificador: 'Lote P2 - Cítricos Valle',
+    cultivoNombre: 'Naranja Valencia',
+    area: 30.0,
+    estado: 'Saludable',
+    humedadSuelo: 59,
+    sensoresCount: 5,
+    ultimaActualizacion: 'hoy 10:50',
+    tipoSuelo: 'Franco',
+    color: '#22c55e',
+    notas: 'Cítricos tecnificados con fertirriego por microaspersión.',
+    polygon: '350,170 550,150 590,260 380,290',
+    labelPos: 'top-[26%] left-[46%]'
+  },
+  {
+    id: 'lot-p3',
+    terrenoId: 'ter-1',
+    identificador: 'Lote P3 - Platanera Sur',
+    cultivoNombre: 'Plátano Hartón',
+    area: 25.0,
+    estado: 'Saludable',
+    humedadSuelo: 68,
+    sensoresCount: 5,
+    ultimaActualizacion: 'hoy 09:40',
+    tipoSuelo: 'Aluvial',
+    color: '#22c55e',
+    notas: 'Alta materia orgánica y drenaje natural.',
+    polygon: '180,330 380,300 430,410 230,440',
+    labelPos: 'top-[68%] left-[32%]'
+  },
+  {
+    id: 'lot-p4',
+    terrenoId: 'ter-1',
+    identificador: 'Lote P4 - Aguacate Hass',
+    cultivoNombre: 'Aguacate Hass',
+    area: 30.0,
+    estado: 'Monitoreo',
+    humedadSuelo: 47,
+    sensoresCount: 8,
+    ultimaActualizacion: 'hoy 08:20',
+    tipoSuelo: 'Franco-Arenoso',
+    color: '#eab308',
+    notas: 'Monitoreo de humedad radicular preventivo en ladera.',
+    polygon: '560,150 720,140 760,260 610,280',
+    labelPos: 'top-[22%] left-[68%]'
+  },
+
+  // Finca El Paraíso (ter-2 - Mockup Page 4)
   {
     id: 'lot-a',
     terrenoId: 'ter-2',
@@ -86,7 +153,9 @@ const initialLotes = [
     ultimaActualizacion: 'hoy 10:45',
     tipoSuelo: 'Franco-Arcilloso',
     color: '#22c55e',
-    notas: 'Excelente retención de humedad, microclima óptimo.'
+    notas: 'Excelente retención de humedad, microclima óptimo.',
+    polygon: '140,240 280,210 320,290 180,330',
+    labelPos: 'top-[48%] left-[24%]'
   },
   {
     id: 'lot-b',
@@ -100,7 +169,9 @@ const initialLotes = [
     ultimaActualizacion: 'hoy 10:30',
     tipoSuelo: 'Franco',
     color: '#eab308',
-    notas: 'Humedad por debajo del umbral mínimo del 40%. Se recomienda riego en 24h.'
+    notas: 'Humedad por debajo del umbral mínimo del 40%. Se recomienda riego en 24h.',
+    polygon: '340,180 540,160 590,270 370,300',
+    labelPos: 'top-[28%] left-[45%]'
   },
   {
     id: 'lot-c',
@@ -114,7 +185,9 @@ const initialLotes = [
     ultimaActualizacion: 'hoy 09:15',
     tipoSuelo: 'Franco-Arenoso',
     color: '#22c55e',
-    notas: 'Etapa vegetativa normal, sin estrés biótico detectado.'
+    notas: 'Etapa vegetativa normal, sin estrés biótico detectado.',
+    polygon: '190,340 370,310 420,410 240,440',
+    labelPos: 'top-[68%] left-[34%]'
   },
   {
     id: 'lot-d',
@@ -128,9 +201,178 @@ const initialLotes = [
     ultimaActualizacion: 'hoy 08:30',
     tipoSuelo: 'Franco',
     color: '#22c55e',
-    notas: 'Sombra semidensa eficiente y drenaje balanceado.'
+    notas: 'Sombra semidensa eficiente y drenaje balanceado.',
+    polygon: '550,150 710,140 750,260 600,280',
+    labelPos: 'top-[22%] left-[66%]'
+  },
+
+  // Finca Los Naranjos (ter-5 - Caldas · Cítricos y Aguacate)
+  {
+    id: 'lot-n1',
+    terrenoId: 'ter-5',
+    identificador: 'Lote N1 - Cítricos Norte',
+    cultivoNombre: 'Mandarina Oneco',
+    area: 25.0,
+    estado: 'Saludable',
+    humedadSuelo: 61,
+    sensoresCount: 6,
+    ultimaActualizacion: 'hoy 10:20',
+    tipoSuelo: 'Volcánico Franco',
+    color: '#22c55e',
+    notas: 'Cítricos de ladera con alta retención de nutrientes y buen drenaje.',
+    polygon: '140,210 320,180 360,280 180,310',
+    labelPos: 'top-[36%] left-[26%]'
+  },
+  {
+    id: 'lot-n2',
+    terrenoId: 'ter-5',
+    identificador: 'Lote N2 - Naranja Valencia',
+    cultivoNombre: 'Naranja Valencia',
+    area: 30.0,
+    estado: 'Saludable',
+    humedadSuelo: 58,
+    sensoresCount: 5,
+    ultimaActualizacion: 'hoy 09:30',
+    tipoSuelo: 'Franco',
+    color: '#22c55e',
+    notas: 'Riego por aspersión tecnificado funcionando en horario nocturno.',
+    polygon: '350,160 560,150 600,260 380,280',
+    labelPos: 'top-[25%] left-[47%]'
+  },
+  {
+    id: 'lot-n3',
+    terrenoId: 'ter-5',
+    identificador: 'Lote N3 - Limón Tahití',
+    cultivoNombre: 'Limón Tahití',
+    area: 20.0,
+    estado: 'Saludable',
+    humedadSuelo: 64,
+    sensoresCount: 4,
+    ultimaActualizacion: 'hoy 08:50',
+    tipoSuelo: 'Franco-Arcilloso',
+    color: '#22c55e',
+    notas: 'Lote certificado para exportación a mercado europeo.',
+    polygon: '190,320 390,290 440,400 240,430',
+    labelPos: 'top-[66%] left-[33%]'
+  },
+  {
+    id: 'lot-n4',
+    terrenoId: 'ter-5',
+    identificador: 'Lote N4 - Aguacate Caldas',
+    cultivoNombre: 'Aguacate Hass',
+    area: 20.0,
+    estado: 'Monitoreo',
+    humedadSuelo: 52,
+    sensoresCount: 5,
+    ultimaActualizacion: 'hoy 08:15',
+    tipoSuelo: 'Andisol Franco',
+    color: '#eab308',
+    notas: 'Control fitosanitario preventivo para trips y ácaros.',
+    polygon: '570,160 740,150 770,270 610,290',
+    labelPos: 'top-[25%] left-[70%]'
+  },
+
+  // Finca La Esperanza (ter-3 - Antioquia)
+  {
+    id: 'lot-e1',
+    terrenoId: 'ter-3',
+    identificador: 'Lote E1 - Cafetal Tradicional',
+    cultivoNombre: 'Café Castillo',
+    area: 60.0,
+    estado: 'Monitoreo',
+    humedadSuelo: 49,
+    sensoresCount: 12,
+    ultimaActualizacion: 'hoy 10:10',
+    tipoSuelo: 'Franco-Arcilloso',
+    color: '#eab308',
+    notas: 'Pendiente pronunciada con sombrío regulado de guamo.',
+    polygon: '140,200 340,170 380,290 190,320',
+    labelPos: 'top-[36%] left-[27%]'
+  },
+  {
+    id: 'lot-e2',
+    terrenoId: 'ter-3',
+    identificador: 'Lote E2 - Reserva Forestal',
+    cultivoNombre: 'Bosque Protector',
+    area: 45.0,
+    estado: 'Saludable',
+    humedadSuelo: 75,
+    sensoresCount: 8,
+    ultimaActualizacion: 'hoy 09:20',
+    tipoSuelo: 'Orgánico',
+    color: '#22c55e',
+    notas: 'Zona de amortiguamiento y protección de fuentes hídricas.',
+    polygon: '360,160 560,140 600,250 390,280',
+    labelPos: 'top-[24%] left-[48%]'
+  },
+  {
+    id: 'lot-e3',
+    terrenoId: 'ter-3',
+    identificador: 'Lote E3 - Maíz Ladera',
+    cultivoNombre: 'Maíz Híbrido',
+    area: 45.0,
+    estado: 'Saludable',
+    humedadSuelo: 56,
+    sensoresCount: 12,
+    ultimaActualizacion: 'hoy 08:40',
+    tipoSuelo: 'Franco',
+    color: '#22c55e',
+    notas: 'Cultivo establecido en curvas a nivel para control de erosión.',
+    polygon: '210,330 410,290 460,420 260,450',
+    labelPos: 'top-[67%] left-[35%]'
+  },
+
+  // Finca San José (ter-4 - Tolima)
+  {
+    id: 'lot-s1',
+    terrenoId: 'ter-4',
+    identificador: 'Lote S1 - Cacaotal Bajo',
+    cultivoNombre: 'Cacao Fino',
+    area: 22.0,
+    estado: 'Estado: Alerta',
+    humedadSuelo: 29,
+    sensoresCount: 5,
+    ultimaActualizacion: 'hoy 10:05',
+    tipoSuelo: 'Franco-Arenoso',
+    color: '#ef4444',
+    notas: 'Alerta por déficit hídrico prolongado y temperatura elevada.',
+    polygon: '150,210 340,180 390,290 200,320',
+    labelPos: 'top-[38%] left-[28%]'
+  },
+  {
+    id: 'lot-s2',
+    terrenoId: 'ter-4',
+    identificador: 'Lote S2 - Platanal San José',
+    cultivoNombre: 'Plátano Dominico',
+    area: 20.0,
+    estado: 'Advertencia',
+    humedadSuelo: 38,
+    sensoresCount: 4,
+    ultimaActualizacion: 'hoy 09:10',
+    tipoSuelo: 'Franco',
+    color: '#eab308',
+    notas: 'Riego de auxilio programado para las próximas 12 horas.',
+    polygon: '360,170 560,150 610,260 400,280',
+    labelPos: 'top-[26%] left-[49%]'
+  },
+  {
+    id: 'lot-s3',
+    terrenoId: 'ter-4',
+    identificador: 'Lote S3 - Frutales de Secano',
+    cultivoNombre: 'Mango Tommy',
+    area: 20.0,
+    estado: 'Saludable',
+    humedadSuelo: 55,
+    sensoresCount: 5,
+    ultimaActualizacion: 'hoy 08:30',
+    tipoSuelo: 'Franco',
+    color: '#22c55e',
+    notas: 'Excelente cuajado de floración y resistencia al calor.',
+    polygon: '220,330 420,300 470,420 270,450',
+    labelPos: 'top-[68%] left-[36%]'
   }
 ];
+
 
 const initialCultivos = [
   {
@@ -314,7 +556,17 @@ class StateManager {
       });
     }
     this.terrenos = this.fincas; // Backwards compatible alias
-    this.lotes = JSON.parse(localStorage.getItem('agro_lotes')) || initialLotes;
+
+    // Merge saved lotes with initialLotes to ensure lotes for all fincas (ter-1 through ter-5) are populated
+    const savedLotes = JSON.parse(localStorage.getItem('agro_lotes')) || [];
+    const lotesMap = new Map();
+    initialLotes.forEach(l => lotesMap.set(l.id, l));
+    savedLotes.forEach(l => {
+      const existing = lotesMap.get(l.id) || {};
+      lotesMap.set(l.id, { ...existing, ...l });
+    });
+    this.lotes = Array.from(lotesMap.values());
+
     this.cultivos = JSON.parse(localStorage.getItem('agro_cultivos')) || initialCultivos;
     this.sensores = JSON.parse(localStorage.getItem('agro_sensores')) || initialSensores;
     this.alertas = JSON.parse(localStorage.getItem('agro_alertas')) || initialAlertas;
@@ -323,7 +575,8 @@ class StateManager {
     this.bitacoraAudit = JSON.parse(localStorage.getItem('agro_audit')) || [];
 
     this.selectedFincaId = localStorage.getItem('agro_selected_finca') || 'ter-1';
-    this.selectedLoteId = 'lot-b';
+    const fincaLotes = this.getLotesForFinca(this.selectedFincaId);
+    this.selectedLoteId = (fincaLotes[0] && fincaLotes[0].id) || 'lot-p1';
     this.selectedCultivoId = 'cul-tomate';
     this.activeView = 'dashboard';
     this.searchQuery = '';
@@ -337,6 +590,12 @@ class StateManager {
 
   get activeFinca() {
     return this.fincas.find(f => f.id === this.selectedFincaId) || this.fincas[0];
+  }
+
+  getLotesForFinca(fincaId) {
+    const targetId = fincaId || this.selectedFincaId;
+    const filtered = this.lotes.filter(l => l.terrenoId === targetId);
+    return filtered.length > 0 ? filtered : initialLotes.filter(l => l.terrenoId === targetId);
   }
 
   addAuditLog(modulo, accion, detalle) {
@@ -398,7 +657,12 @@ const state = new StateManager();
 // Global Window Helpers & Interactions
 window.handleFincaChange = function(fincaId) {
   state.selectedFincaId = fincaId;
+  const fincaLotes = state.getLotesForFinca(fincaId);
+  if (fincaLotes.length > 0) {
+    state.selectedLoteId = fincaLotes[0].id;
+  }
   state.save();
+  renderHeader();
   renderCurrentView();
 };
 
@@ -458,6 +722,7 @@ function renderHeader() {
         ${f.nombre}
       </option>
     `).join('');
+    fincaSelect.value = state.selectedFincaId;
   }
 
   if (!container) return;
@@ -938,8 +1203,9 @@ function renderFincasView() {
                     <button onclick="window.handleFincaChange('${f.id}')" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">
                       ${isSelected ? 'Seleccionada' : 'Seleccionar finca'}
                     </button>
-                    <button onclick="window.openFincaDetailModal('${f.id}')" class="text-xs text-slate-400 hover:text-slate-600">
-                      Ver detalles ···
+                    <button onclick="window.openFincaDetailModal('${f.id}')" class="text-xs text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 px-2 py-1 rounded-lg font-semibold transition-colors flex items-center gap-1 cursor-pointer" title="Ver información técnica y lotes de ${f.nombre}">
+                      <span>Ver detalles</span>
+                      <span class="text-slate-400">···</span>
                     </button>
                   </div>
                 </div>
@@ -974,9 +1240,12 @@ function renderFincasView() {
                       ${f.estado}
                     </span>
                   </td>
-                  <td class="p-3.5 text-right">
-                    <button onclick="window.handleFincaChange('${f.id}')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">
-                      Cambiar
+                  <td class="p-3.5 text-right space-x-1">
+                    <button onclick="window.openFincaDetailModal('${f.id}')" class="px-2.5 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-colors">
+                      Ver detalles
+                    </button>
+                    <button onclick="window.handleFincaChange('${f.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                      ${f.id === state.selectedFincaId ? 'Activa' : 'Seleccionar'}
                     </button>
                   </td>
                 </tr>
@@ -985,6 +1254,7 @@ function renderFincasView() {
           </table>
         </div>
       `}
+
     </div>
   `;
 }
@@ -993,16 +1263,38 @@ function renderFincasView() {
 // SCREEN 3: TERRENOS Y LOTES (Mockup Page 4)
 // ----------------------------------------------------
 function renderTerrenosView() {
-  const selectedLote = state.lotes.find(l => l.id === state.selectedLoteId) || state.lotes[1] || state.lotes[0];
+  const currentFinca = state.activeFinca;
+  const fincaLotes = state.getLotesForFinca(currentFinca.id);
+
+  let selectedLote = fincaLotes.find(l => l.id === state.selectedLoteId);
+  if (!selectedLote) {
+    selectedLote = fincaLotes[0] || state.lotes[0];
+    if (selectedLote) {
+      state.selectedLoteId = selectedLote.id;
+    }
+  }
+
+  // Get distinct crop names for this finca's lots
+  const lotCrops = Array.from(new Set(fincaLotes.map(l => l.cultivoNombre))).filter(Boolean);
+
+  // Find related cultivo if any for the "Ver en detalle" button
+  const relatedCultivo = selectedLote
+    ? (state.cultivos.find(c => c.nombre.toLowerCase().includes((selectedLote.cultivoNombre || '').toLowerCase().split(' ')[0])) || state.cultivos[0])
+    : state.cultivos[0];
 
   return `
     <div class="space-y-5">
-      <!-- Header -->
+      <!-- Header with Active Farm details -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-slate-900">Terrenos y Lotes</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Terrenos y Lotes</h1>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              ${currentFinca.nombre}
+            </span>
+          </div>
           <p class="text-xs text-slate-500 mt-0.5">
-            Visualiza y administra la división de lotes por finca.
+            Visualiza y administra la delimitación satelital de lotes para <strong class="text-slate-700">${currentFinca.nombre}</strong> (${currentFinca.ubicacion} · ${currentFinca.areaTotal} Ha · ${fincaLotes.length} lotes).
           </p>
         </div>
 
@@ -1015,32 +1307,37 @@ function renderTerrenosView() {
       <!-- Filters & View Switcher Bar (Page 4) -->
       <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex flex-wrap items-center gap-2">
-          <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
-            <option>Buscar lote (Todos)</option>
-            <option>Lote A</option>
-            <option>Lote B</option>
-            <option>Lote C</option>
-            <option>Lote D</option>
+          <!-- Dynamic Lot Selector -->
+          <select onchange="if(this.value) window.selectLote(this.value)" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
+            <option value="">Lotes (${fincaLotes.length} en ${currentFinca.nombre})</option>
+            ${fincaLotes.map(l => `
+              <option value="${l.id}" ${l.id === selectedLote?.id ? 'selected' : ''}>
+                ${l.identificador} · ${l.cultivoNombre}
+              </option>
+            `).join('')}
           </select>
 
+          <!-- Status Filter -->
           <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
-            <option>Estado</option>
+            <option>Estado (Todos)</option>
             <option>Saludable</option>
             <option>Advertencia</option>
-            <option>Crítico</option>
+            <option>Crítico / Alerta</option>
           </select>
 
+          <!-- Dynamic Crop Filter -->
           <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none hidden md:inline-block">
-            <option>Filtrar por cultivo</option>
-            <option>Café</option>
-            <option>Tomate</option>
-            <option>Maíz</option>
-            <option>Cacao</option>
+            <option>Cultivo (Todos)</option>
+            ${lotCrops.map(crop => `
+              <option value="${crop}">${crop}</option>
+            `).join('')}
           </select>
 
-          <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none hidden md:inline-block">
-            <option>Filtrar por estado</option>
-          </select>
+          <!-- Farm indicator badge -->
+          <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200/70 font-semibold text-[11px]">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>${currentFinca.nombre}</span>
+          </div>
         </div>
 
         <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
@@ -1053,169 +1350,273 @@ function renderTerrenosView() {
         </div>
       </div>
 
-      <!-- Main Layout: Map Canvas (Left) + Selected Lot Drawer (Right) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Interactive Satellite Drone Map Canvas (Page 4) -->
-        <div class="lg:col-span-2 bg-[#0D2E20] rounded-2xl overflow-hidden relative shadow-md min-h-[440px] flex flex-col justify-between border border-[#184832]">
-          <!-- Satellite Aerial Background Image with resilient fallback -->
-          <div class="absolute inset-0 bg-gradient-to-br from-[#0e2c1c] via-[#143e29] to-[#0a1e14]">
-            <img
-              src="/images/finca_aerial_map.jpg"
-              alt="Mapa satelital de lotes de la finca"
-              class="w-full h-full object-cover opacity-85"
-              onerror="this.onerror=null; this.src='/images/finca_palmas.jpg';"
-            />
-          </div>
+      ${state.lotesViewMode === 'lista' ? `
+        <!-- Lots Table View -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="p-3.5">Lote / Parcela</th>
+                <th class="p-3.5">Cultivo Sembrado</th>
+                <th class="p-3.5">Área (Ha)</th>
+                <th class="p-3.5">Humedad Suelo</th>
+                <th class="p-3.5">Sensores IoT</th>
+                <th class="p-3.5">Tipo de Suelo</th>
+                <th class="p-3.5">Estado</th>
+                <th class="p-3.5 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${fincaLotes.map(l => {
+                const isSel = l.id === selectedLote?.id;
+                return `
+                  <tr class="hover:bg-slate-50/80 transition-colors ${isSel ? 'bg-emerald-50/40' : ''}">
+                    <td class="p-3.5">
+                      <div class="font-bold text-slate-900">${l.identificador}</div>
+                      <div class="text-[10px] text-slate-400">Actualizado: ${l.ultimaActualizacion}</div>
+                    </td>
+                    <td class="p-3.5 font-medium text-slate-700">${l.cultivoNombre}</td>
+                    <td class="p-3.5 font-mono">${l.area} Ha</td>
+                    <td class="p-3.5">
+                      <span class="font-mono font-bold ${l.humedadSuelo < 40 ? 'text-amber-600' : 'text-emerald-600'}">
+                        ${l.humedadSuelo}%
+                      </span>
+                    </td>
+                    <td class="p-3.5 font-mono">${l.sensoresCount} activos</td>
+                    <td class="p-3.5 text-slate-600">${l.tipoSuelo}</td>
+                    <td class="p-3.5">
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        l.estado === 'Saludable'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : l.estado.includes('Alerta') || l.estado === 'Crítico'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }">
+                        ${l.estado}
+                      </span>
+                    </td>
+                    <td class="p-3.5 text-right space-x-1">
+                      <button onclick="window.selectLote('${l.id}'); window.setLotesViewMode('mapa');" class="px-2.5 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-colors">
+                        Ver en mapa
+                      </button>
+                      <button onclick="window.openProgramarRiegoModal('${l.identificador}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                        Riego
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <!-- Main Layout: Map Canvas (Left) + Selected Lot Drawer (Right) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Interactive Satellite Drone Map Canvas (Page 4) -->
+          <div class="lg:col-span-2 bg-[#0D2E20] rounded-2xl overflow-hidden relative shadow-md min-h-[460px] flex flex-col justify-between border border-[#184832]">
+            <!-- Satellite Aerial Background Image of Active Finca with fallback -->
+            <div class="absolute inset-0 bg-gradient-to-br from-[#0e2c1c] via-[#143e29] to-[#0a1e14]">
+              <img
+                src="${currentFinca.imagen || '/images/finca_aerial_map.jpg'}"
+                alt="Mapa satelital de lotes de ${currentFinca.nombre}"
+                class="w-full h-full object-cover opacity-85 transition-opacity duration-300"
+                onerror="this.onerror=null; this.src='/images/finca_aerial_map.jpg';"
+              />
+            </div>
 
-          <!-- SVG Interactive Lot Polygons -->
-          <svg class="absolute inset-0 w-full h-full cursor-pointer z-10" viewBox="0 0 800 500" preserveAspectRatio="none">
-            <!-- Lote A (Verde Saludable) -->
-            <polygon
-              points="140,240 280,210 320,290 180,330"
-              fill="rgba(34, 197, 94, 0.45)"
-              stroke="${state.selectedLoteId === 'lot-a' ? '#ffffff' : '#16a34a'}"
-              stroke-width="${state.selectedLoteId === 'lot-a' ? '4' : '2'}"
-              onclick="window.selectLote('lot-a')"
-              class="hover:opacity-90 transition-opacity"
-            />
-
-            <!-- Lote B (Amarillo Advertencia - Mockup Page 4 center) -->
-            <polygon
-              points="340,180 540,160 590,270 370,300"
-              fill="rgba(234, 179, 8, 0.55)"
-              stroke="${state.selectedLoteId === 'lot-b' ? '#ffffff' : '#ca8a04'}"
-              stroke-width="${state.selectedLoteId === 'lot-b' ? '4' : '2'}"
-              onclick="window.selectLote('lot-b')"
-              class="hover:opacity-90 transition-opacity"
-            />
-
-            <!-- Lote C (Verde Saludable) -->
-            <polygon
-              points="190,340 370,310 420,410 240,440"
-              fill="rgba(34, 197, 94, 0.45)"
-              stroke="${state.selectedLoteId === 'lot-c' ? '#ffffff' : '#16a34a'}"
-              stroke-width="${state.selectedLoteId === 'lot-c' ? '4' : '2'}"
-              onclick="window.selectLote('lot-c')"
-              class="hover:opacity-90 transition-opacity"
-            />
-
-            <!-- Lote D (Verde Saludable) -->
-            <polygon
-              points="550,150 710,140 750,260 600,280"
-              fill="rgba(34, 197, 94, 0.45)"
-              stroke="${state.selectedLoteId === 'lot-d' ? '#ffffff' : '#16a34a'}"
-              stroke-width="${state.selectedLoteId === 'lot-d' ? '4' : '2'}"
-              onclick="window.selectLote('lot-d')"
-              class="hover:opacity-90 transition-opacity"
-            />
-          </svg>
-
-          <!-- Lot Overlay Floating Chips (Matching Page 4 labels) -->
-          <div class="relative z-20 p-4 flex flex-col justify-between h-full pointer-events-none">
-            <!-- Interactive Floating Tags -->
-            <div class="space-y-2 pointer-events-auto">
-              <!-- Label Lote B -->
-              <div onclick="window.selectLote('lot-b')" class="absolute top-[28%] left-[45%] -translate-x-1/2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-amber-300 shadow-md text-xs cursor-pointer hover:scale-105 transition-transform">
-                <span class="font-bold text-slate-900 block">Lote B</span>
-                <span class="text-[10px] text-slate-600">Tomate · 8 ha · Advertencia · Humedad 35%</span>
-              </div>
-
-              <!-- Label Lote A -->
-              <div onclick="window.selectLote('lot-a')" class="absolute top-[48%] left-[24%] -translate-x-1/2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-emerald-300 shadow-md text-xs cursor-pointer hover:scale-105 transition-transform">
-                <span class="font-bold text-slate-900 block">Lote A</span>
-                <span class="text-[10px] text-slate-600">Café · 12 ha · Saludable · Humedad 62%</span>
-              </div>
-
-              <!-- Label Lote C -->
-              <div onclick="window.selectLote('lot-c')" class="absolute top-[68%] left-[34%] -translate-x-1/2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-emerald-300 shadow-md text-xs cursor-pointer hover:scale-105 transition-transform">
-                <span class="font-bold text-slate-900 block">Lote C</span>
-                <span class="text-[10px] text-slate-600">Maíz · 15 ha · Saludable · Humedad 58%</span>
+            <!-- Top Overlay Badge identifying active Finca on the map -->
+            <div class="relative z-20 p-4 flex items-center justify-between pointer-events-none">
+              <div class="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white flex items-center gap-2 text-xs shadow-md">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-bold">${currentFinca.nombre}</span>
+                <span class="text-white/60">·</span>
+                <span class="text-white/80">${fincaLotes.length} lotes mapeados</span>
               </div>
             </div>
 
-            <!-- Map Legend (Page 4 bottom left) -->
-            <div class="mt-auto bg-slate-900/85 backdrop-blur-md p-3 rounded-xl border border-slate-700/80 w-max text-xs space-y-1.5 pointer-events-auto">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                <span class="text-slate-200 text-[11px]">Saludable</span>
+            <!-- SVG Interactive Lot Polygons dynamically rendered for active Finca -->
+            <svg class="absolute inset-0 w-full h-full cursor-pointer z-10" viewBox="0 0 800 500" preserveAspectRatio="none">
+              ${fincaLotes.map(lote => {
+                const isSel = lote.id === selectedLote?.id;
+                let strokeColor = '#16a34a';
+                let fillColor = 'rgba(34, 197, 94, 0.45)';
+
+                if (lote.estado === 'Advertencia' || lote.estado === 'Monitoreo') {
+                  strokeColor = '#ca8a04';
+                  fillColor = 'rgba(234, 179, 8, 0.55)';
+                } else if (lote.estado.includes('Alerta') || lote.estado === 'Crítico') {
+                  strokeColor = '#e11d48';
+                  fillColor = 'rgba(244, 63, 94, 0.55)';
+                }
+
+                if (isSel) {
+                  strokeColor = '#ffffff';
+                }
+
+                return `
+                  <polygon
+                    points="${lote.polygon || '150,200 350,180 390,280 190,300'}"
+                    fill="${fillColor}"
+                    stroke="${strokeColor}"
+                    stroke-width="${isSel ? '4' : '2'}"
+                    onclick="window.selectLote('${lote.id}')"
+                    class="hover:opacity-95 transition-all"
+                  >
+                    <title>${lote.identificador} - ${lote.cultivoNombre} (${lote.estado})</title>
+                  </polygon>
+                `;
+              }).join('')}
+            </svg>
+
+            <!-- Lot Overlay Floating Chips (Matching Page 4 labels dynamically) -->
+            <div class="relative z-20 p-4 flex flex-col justify-between h-full pointer-events-none">
+              <!-- Interactive Floating Tags -->
+              <div class="space-y-2 pointer-events-auto">
+                ${fincaLotes.map(lote => {
+                  const isSel = lote.id === selectedLote?.id;
+                  let borderClass = 'border-emerald-300';
+                  let dotColor = 'bg-emerald-500';
+
+                  if (lote.estado === 'Advertencia' || lote.estado === 'Monitoreo') {
+                    borderClass = 'border-amber-400';
+                    dotColor = 'bg-amber-500';
+                  } else if (lote.estado.includes('Alerta') || lote.estado === 'Crítico') {
+                    borderClass = 'border-rose-400';
+                    dotColor = 'bg-rose-500';
+                  }
+
+                  return `
+                    <div
+                      onclick="window.selectLote('${lote.id}')"
+                      class="absolute ${lote.labelPos || 'top-[40%] left-[40%]'} -translate-x-1/2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border ${borderClass} shadow-md text-xs cursor-pointer hover:scale-105 transition-all ${
+                        isSel ? 'ring-2 ring-emerald-500 scale-105 shadow-lg' : ''
+                      }"
+                    >
+                      <span class="font-bold text-slate-900 block leading-tight flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full ${dotColor}"></span>
+                        ${lote.identificador}
+                      </span>
+                      <span class="text-[10px] text-slate-600 block mt-0.5">
+                        ${lote.cultivoNombre} · ${lote.area} ha · ${lote.estado} · Humedad ${lote.humedadSuelo}%
+                      </span>
+                    </div>
+                  `;
+                }).join('')}
               </div>
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                <span class="text-slate-200 text-[11px]">Advertencia</span>
+
+              <!-- Map Legend (Page 4 bottom left) -->
+              <div class="mt-auto bg-slate-900/85 backdrop-blur-md p-3 rounded-xl border border-slate-700/80 w-max text-xs space-y-1.5 pointer-events-auto">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span class="text-slate-200 text-[11px]">Saludable</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                  <span class="text-slate-200 text-[11px]">Advertencia / Monitoreo</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                  <span class="text-slate-200 text-[11px]">Crítico / Alerta</span>
+                </div>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                <span class="text-slate-200 text-[11px]">Crítico</span>
+            </div>
+          </div>
+
+          <!-- Right Side Drawer / Lot Detail Panel (Page 4) -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs space-y-5 flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Detalle del Lote</span>
+                  <h3 class="text-xl font-bold text-slate-900">${selectedLote ? selectedLote.identificador : 'Sin lote'}</h3>
+                </div>
+                ${selectedLote ? `
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-full ${
+                    selectedLote.estado === 'Saludable'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : selectedLote.estado.includes('Alerta') || selectedLote.estado === 'Crítico'
+                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                        : 'bg-amber-50 text-amber-700 border border-amber-200'
+                  }">
+                    ${selectedLote.estado}
+                  </span>
+                ` : ''}
               </div>
+
+              ${selectedLote ? `
+                <div class="space-y-2.5 text-xs">
+                  <div class="flex justify-between py-1.5 border-b border-slate-100">
+                    <span class="text-slate-500">Finca:</span>
+                    <span class="font-bold text-slate-900">${currentFinca.nombre}</span>
+                  </div>
+
+                  <div class="flex justify-between py-1.5 border-b border-slate-100">
+                    <span class="text-slate-500">Cultivo:</span>
+                    <span class="font-bold text-slate-900">${selectedLote.cultivoNombre}</span>
+                  </div>
+
+                  <div class="flex justify-between py-1.5 border-b border-slate-100">
+                    <span class="text-slate-500">Área:</span>
+                    <span class="font-bold text-slate-900 font-mono">${selectedLote.area} hectáreas</span>
+                  </div>
+
+                  <div class="flex justify-between py-1.5 border-b border-slate-100">
+                    <span class="text-slate-500">Estado:</span>
+                    <span class="font-bold ${
+                      selectedLote.estado === 'Saludable'
+                        ? 'text-emerald-700'
+                        : selectedLote.estado.includes('Alerta') || selectedLote.estado === 'Crítico'
+                          ? 'text-rose-700'
+                          : 'text-amber-700'
+                    }">${selectedLote.estado}</span>
+                  </div>
+
+                  <div class="flex justify-between py-1.5 border-b border-slate-100">
+                    <span class="text-slate-500">Humedad del suelo:</span>
+                    <span class="font-bold font-mono ${selectedLote.humedadSuelo < 40 ? 'text-amber-600' : 'text-emerald-600'}">${selectedLote.humedadSuelo}%</span>
+                  </div>
+
+                  <div class="flex justify-between py-1.5 border-b border-slate-100">
+                    <span class="text-slate-500">Sensores conectados:</span>
+                    <span class="font-bold text-slate-900 font-mono">${selectedLote.sensoresCount}</span>
+                  </div>
+
+                  <div class="flex justify-between py-1.5 border-b border-slate-100">
+                    <span class="text-slate-500">Tipo de suelo:</span>
+                    <span class="font-bold text-slate-900">${selectedLote.tipoSuelo}</span>
+                  </div>
+
+                  <div class="flex justify-between py-1.5 text-slate-400 text-[11px]">
+                    <span>Última actualización:</span>
+                    <span>${selectedLote.ultimaActualizacion}</span>
+                  </div>
+
+                  ${selectedLote.notas ? `
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200/70 text-[11px] text-slate-600">
+                      <strong>Observaciones:</strong> ${selectedLote.notas}
+                    </div>
+                  ` : ''}
+                </div>
+              ` : `
+                <p class="text-xs text-slate-500 py-4">Selecciona un lote en el mapa satelital para ver sus métricas detalladas.</p>
+              `}
+            </div>
+
+            <!-- Action Buttons (Page 4: Ver en detalle & Programar riego) -->
+            <div class="space-y-2 pt-4 border-t border-slate-100">
+              <button onclick="window.switchView('ficha_cultivo', '${relatedCultivo ? relatedCultivo.id : 'cul-tomate'}')" class="w-full py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+                <span>Ver en detalle</span>
+              </button>
+
+              <button onclick="window.openProgramarRiegoModal('${selectedLote ? selectedLote.identificador : ''}')" class="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-1.5">
+                <i data-lucide="droplets" class="w-4 h-4 text-emerald-600"></i>
+                <span>Programar riego</span>
+              </button>
             </div>
           </div>
         </div>
-
-        <!-- Right Side Drawer / Lot Detail Panel (Page 4) -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs space-y-5 flex flex-col justify-between">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Detalle del Lote</span>
-                <h3 class="text-xl font-bold text-slate-900">${selectedLote.identificador}</h3>
-              </div>
-              <span class="text-xs font-bold px-2.5 py-1 rounded-full ${selectedLote.estado === 'Saludable' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
-                ${selectedLote.estado}
-              </span>
-            </div>
-
-            <div class="space-y-2.5 text-xs">
-              <div class="flex justify-between py-1.5 border-b border-slate-100">
-                <span class="text-slate-500">Cultivo:</span>
-                <span class="font-bold text-slate-900">${selectedLote.cultivoNombre}</span>
-              </div>
-
-              <div class="flex justify-between py-1.5 border-b border-slate-100">
-                <span class="text-slate-500">Área:</span>
-                <span class="font-bold text-slate-900 font-mono">${selectedLote.area} hectáreas</span>
-              </div>
-
-              <div class="flex justify-between py-1.5 border-b border-slate-100">
-                <span class="text-slate-500">Estado:</span>
-                <span class="font-bold ${selectedLote.estado === 'Saludable' ? 'text-emerald-700' : 'text-amber-700'}">${selectedLote.estado}</span>
-              </div>
-
-              <div class="flex justify-between py-1.5 border-b border-slate-100">
-                <span class="text-slate-500">Humedad del suelo:</span>
-                <span class="font-bold font-mono ${selectedLote.humedadSuelo < 40 ? 'text-amber-600' : 'text-emerald-600'}">${selectedLote.humedadSuelo}%</span>
-              </div>
-
-              <div class="flex justify-between py-1.5 border-b border-slate-100">
-                <span class="text-slate-500">Sensores conectados:</span>
-                <span class="font-bold text-slate-900 font-mono">${selectedLote.sensoresCount}</span>
-              </div>
-
-              <div class="flex justify-between py-1.5 border-b border-slate-100">
-                <span class="text-slate-500">Tipo de suelo:</span>
-                <span class="font-bold text-slate-900">${selectedLote.tipoSuelo}</span>
-              </div>
-
-              <div class="flex justify-between py-1.5 text-slate-400 text-[11px]">
-                <span>Última actualización:</span>
-                <span>${selectedLote.ultimaActualizacion}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Action Buttons (Page 4: Ver en detalle & Programar riego) -->
-          <div class="space-y-2 pt-4 border-t border-slate-100">
-            <button onclick="window.switchView('ficha_cultivo', 'cul-tomate')" class="w-full py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5">
-              <i data-lucide="eye" class="w-4 h-4"></i>
-              <span>Ver en detalle</span>
-            </button>
-
-            <button onclick="window.openProgramarRiegoModal('${selectedLote.identificador}')" class="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-1.5">
-              <i data-lucide="droplets" class="w-4 h-4 text-emerald-600"></i>
-              <span>Programar riego</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      `}
     </div>
   `;
 }
@@ -2020,10 +2421,10 @@ window.handleLoginFormSubmit = function(event) {
 // ----------------------------------------------------
 // MODALS & ACTIONS (Cultivo Edit, Producción Edit, etc.)
 // ----------------------------------------------------
-function renderModalWrapper(title, iconName, bodyHTML) {
+function renderModalWrapper(title, iconName, bodyHTML, maxWidthClass = 'max-w-lg') {
   return `
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 w-full ${maxWidthClass} overflow-hidden flex flex-col max-h-[92vh]">
         <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div class="flex items-center gap-2.5">
             <div class="p-2 bg-emerald-50 text-emerald-700 rounded-xl">
@@ -2042,6 +2443,163 @@ function renderModalWrapper(title, iconName, bodyHTML) {
     </div>
   `;
 }
+
+window.openFincaDetailModal = function(fincaId) {
+  const container = document.getElementById('modal-container');
+  if (!container) return;
+
+  const f = state.fincas.find(item => item.id === fincaId) || state.fincas[0];
+  if (!f) return;
+
+  const isSelected = f.id === state.selectedFincaId;
+  const statusClass = f.estado.includes('Saludable')
+    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    : f.estado.includes('Monitoreo')
+      ? 'bg-amber-50 text-amber-700 border-amber-200'
+      : 'bg-rose-50 text-rose-700 border-rose-200';
+
+  let fincaLotes = state.lotes.filter(l => l.terrenoId === f.id);
+  if (fincaLotes.length === 0) {
+    fincaLotes = state.lotes.slice(0, 3);
+  }
+
+  const bodyHTML = `
+    <div class="space-y-5">
+      <!-- Finca Photo Banner -->
+      <div class="relative h-48 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-inner">
+        <img
+          src="${f.imagen}"
+          alt="${f.nombre}"
+          class="w-full h-full object-cover"
+          onerror="this.onerror=null; this.src='/images/finca_palmas.jpg';"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-5 text-white">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statusClass}">
+              ${f.estado}
+            </span>
+            ${isSelected ? `
+              <span class="bg-[#1B794B] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                Finca Activa
+              </span>
+            ` : ''}
+          </div>
+          <h2 class="text-xl font-bold tracking-tight text-white">${f.nombre}</h2>
+          <p class="text-xs text-slate-300 flex items-center gap-1 mt-0.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
+            ${f.ubicacion} · Responsable: ${f.responsable}
+          </p>
+        </div>
+      </div>
+
+      <!-- 4 Quick Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Área Total</span>
+          <p class="text-lg font-black text-slate-900 font-mono mt-0.5">${f.areaTotal} Ha</p>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cultivos</span>
+          <p class="text-lg font-black text-slate-900 font-mono mt-0.5">${f.cultivosActivos} Activos</p>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sensores IoT</span>
+          <p class="text-lg font-black text-slate-900 font-mono mt-0.5">${f.sensoresActivos} Online</p>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Salud Finca</span>
+          <p class="text-xs font-bold text-emerald-700 mt-1">${f.estado}</p>
+        </div>
+      </div>
+
+      <!-- Technical Description -->
+      <div class="p-3.5 bg-emerald-50/50 border border-emerald-100 rounded-2xl text-xs text-slate-700 space-y-1">
+        <span class="font-bold text-emerald-900 flex items-center gap-1.5 text-xs">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-700"></i>
+          Resumen Técnico del Predio
+        </span>
+        <p class="text-slate-600 text-[11px] leading-relaxed">
+          ${f.descripcion || 'Predio tecnificado registrado en la plataforma AgroControl con telemetría continua.'}
+        </p>
+      </div>
+
+      <!-- Lotes en esta Finca -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+          <h4 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-emerald-700"></i>
+            Lotes y Parcelas Asociadas (${fincaLotes.length})
+          </h4>
+          <span class="text-[10px] text-slate-400">Monitoreo activo</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          ${fincaLotes.map(l => `
+            <div class="p-3 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 transition-colors flex items-center justify-between">
+              <div>
+                <span class="font-bold text-xs text-slate-900 block">${l.identificador}</span>
+                <span class="text-[11px] text-slate-500">${l.cultivoNombre} · ${l.area} Ha</span>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-mono font-bold ${l.humedadSuelo < 40 ? 'text-amber-600' : 'text-emerald-600'}">
+                  ${l.humedadSuelo}% Hum
+                </span>
+                <span class="block text-[9px] uppercase font-bold text-slate-400">${l.estado}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="w-full sm:w-auto px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors">
+          Cerrar
+        </button>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button type="button" onclick="window.selectFincaAndGoToTerrenos('${f.id}')" class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5">
+            <i data-lucide="map" class="w-3.5 h-3.5 text-emerald-700"></i>
+            <span>Ver en Terrenos y Lotes</span>
+          </button>
+
+          <button type="button" onclick="window.selectFincaAndClose('${f.id}')" class="flex-1 sm:flex-none px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>${isSelected ? 'Finca ya activa' : 'Seleccionar como Activa'}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = renderModalWrapper(`Detalles de ${f.nombre}`, 'home', bodyHTML, 'max-w-2xl');
+  if (window.lucide) window.lucide.createIcons();
+};
+
+window.selectFincaAndClose = function(fincaId) {
+  state.selectedFincaId = fincaId;
+  const fincaLotes = state.getLotesForFinca(fincaId);
+  if (fincaLotes.length > 0) {
+    state.selectedLoteId = fincaLotes[0].id;
+  }
+  state.save();
+  window.closeModal();
+  renderHeader();
+  renderCurrentView();
+};
+
+window.selectFincaAndGoToTerrenos = function(fincaId) {
+  state.selectedFincaId = fincaId;
+  const fincaLotes = state.getLotesForFinca(fincaId);
+  if (fincaLotes.length > 0) {
+    state.selectedLoteId = fincaLotes[0].id;
+  }
+  state.save();
+  window.closeModal();
+  renderHeader();
+  window.switchView('terrenos');
+};
+
 
 window.openNewFincaModal = function() {
   const container = document.getElementById('modal-container');
