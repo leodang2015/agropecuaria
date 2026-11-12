@@ -8,11 +8,24 @@ const initialUsers = [
 ];
 
 function getUsers() {
-  return JSON.parse(localStorage.getItem('sena_users')) || initialUsers;
+  const adminUsers = JSON.parse(localStorage.getItem('sena_users')) || initialUsers;
+  const appUsers = JSON.parse(localStorage.getItem('agro_users')) || [];
+  return Array.from(new Map([...adminUsers, ...appUsers].map(user => [user.id, user])).values());
 }
 
 function saveUsers(users) {
   localStorage.setItem('sena_users', JSON.stringify(users));
+  localStorage.setItem('agro_users', JSON.stringify(users));
+}
+
+function getFincas() {
+  return JSON.parse(localStorage.getItem('agro_fincas')) || [
+    { id: 'ter-1', nombre: 'Finca Las Palmas' },
+    { id: 'ter-2', nombre: 'Finca El Paraíso' },
+    { id: 'ter-3', nombre: 'Finca La Esperanza' },
+    { id: 'ter-4', nombre: 'Finca San José' },
+    { id: 'ter-5', nombre: 'Finca Los Naranjos' }
+  ];
 }
 
 function checkAdminAuth() {
@@ -49,6 +62,7 @@ function renderUsers() {
   if (!checkAdminAuth()) return;
 
   const users = getUsers();
+  const fincas = getFincas();
   const tbody = document.getElementById('user-table-body');
   if (!tbody) return;
 
@@ -60,9 +74,11 @@ function renderUsers() {
       <td class="px-4 py-3">
         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
           u.rol === 'administrador' ? 'bg-purple-100 text-purple-800' :
-          u.rol === 'tecnico' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-700'
+          u.rol === 'tecnico' ? 'bg-indigo-100 text-indigo-800' :
+          u.rol === 'cliente' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
         }">${u.rol}</span>
       </td>
+      <td class="px-4 py-3">${fincas.find(finca => finca.id === u.fincaId)?.nombre || '—'}</td>
       <td class="px-4 py-3">
         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
           u.estado === 'activo' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
@@ -114,12 +130,21 @@ window.openNewUserModal = function() {
             </div>
             <div>
               <label for="new-user-role" class="block text-xs font-semibold text-slate-700 mb-1">Rol</label>
-              <select id="new-user-role" name="rol" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <select id="new-user-role" name="rol" onchange="document.getElementById('new-user-farm-field').classList.toggle('hidden', this.value !== 'cliente'); document.getElementById('new-user-farm').required = this.value === 'cliente'" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                 <option value="operario">Operario</option>
+                <option value="agronomo">Ingeniero agrónomo</option>
                 <option value="tecnico">Técnico</option>
+                <option value="cliente">Cliente</option>
                 <option value="administrador">Administrador</option>
               </select>
             </div>
+          </div>
+          <div id="new-user-farm-field" class="hidden">
+            <label for="new-user-farm" class="block text-xs font-semibold text-slate-700 mb-1">Finca asignada *</label>
+            <select id="new-user-farm" name="fincaId" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <option value="">Selecciona una finca</option>
+              ${getFincas().map(finca => `<option value="${finca.id}">${finca.nombre}</option>`).join('')}
+            </select>
           </div>
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
             <button type="button" onclick="window.closeNewUserModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
@@ -143,7 +168,7 @@ window.saveNewUser = function(event) {
   const invalidField = Array.from(form.elements).find(field =>
     field.willValidate && (
       !field.validity.valid ||
-      (['text', 'email'].includes(field.type) && !field.value.trim())
+      (field.required && typeof field.value === 'string' && !field.value.trim())
     )
   );
   let feedback = form.querySelector('[data-form-feedback]');
@@ -168,6 +193,17 @@ window.saveNewUser = function(event) {
   const telefono = form.elements.telefono.value.trim();
   const rol = form.elements.rol.value;
   const users = getUsers();
+  if (users.some(user => user.documento === documento || user.correo?.toLowerCase() === correo.toLowerCase())) {
+    if (!feedback) {
+      feedback = document.createElement('p');
+      feedback.dataset.formFeedback = '';
+      feedback.className = 'text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2';
+      feedback.setAttribute('role', 'alert');
+      form.prepend(feedback);
+    }
+    feedback.textContent = 'Ya existe un usuario con ese documento o correo.';
+    return;
+  }
   users.push({
     id: 'usr-' + Date.now(),
     nombre,
@@ -175,11 +211,28 @@ window.saveNewUser = function(event) {
     correo,
     telefono: telefono || '3000000000',
     rol,
+    ...(rol === 'cliente' ? { fincaId: form.elements.fincaId.value } : {}),
     estado: 'activo'
   });
   saveUsers(users);
   window.closeNewUserModal();
   renderUsers();
+  window.showAdminToast('Registro exitoso. El usuario quedó creado correctamente.');
+};
+
+window.showAdminToast = function(message) {
+  let toast = document.getElementById('admin-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'admin-toast';
+    toast.className = 'fixed bottom-4 right-4 z-[60] max-w-sm rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-800 shadow-lg';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.append(toast);
+  }
+  toast.textContent = message;
+  window.clearTimeout(toast.dismissTimer);
+  toast.dismissTimer = window.setTimeout(() => toast.remove(), 3500);
 };
 
 window.toggleUserStatusAction = function(userId) {

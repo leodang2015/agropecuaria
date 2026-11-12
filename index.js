@@ -6,7 +6,10 @@ const initialUsers = [
   { id: 'usr-1', nombre: 'Juan Díaz', documento: '1098765432', correo: 'juan.diaz@agrocontrol.io', telefono: '3128901234', rol: 'agronomo', estado: 'activo' },
   { id: 'usr-2', nombre: 'Carlos Mario Restrepo', documento: '1017123456', correo: 'carlos.restrepo@sena.edu.co', telefono: '3001234567', rol: 'administrador', estado: 'activo' },
   { id: 'usr-3', nombre: 'María Fernanda Ruiz', documento: '1035456789', correo: 'maria.ruiz@sena.edu.co', telefono: '3204567890', rol: 'operario', estado: 'activo' },
-  { id: 'usr-4', nombre: 'Pedro Nel Gómez', documento: '70112233', correo: 'pedro.gomez@sena.edu.co', telefono: '3157788990', rol: 'operario', estado: 'inactivo' }
+  { id: 'usr-4', nombre: 'Pedro Nel Gómez', documento: '70112233', correo: 'pedro.gomez@sena.edu.co', telefono: '3157788990', rol: 'operario', estado: 'inactivo' },
+  { id: 'usr-tecnico-1', nombre: 'Juan Pérez Velásquez', documento: '71987654', correo: 'juan.perez@agrocontrol.io', telefono: '3109876543', rol: 'tecnico', estado: 'activo' },
+  { id: 'usr-cliente-1', nombre: 'Cliente El Paraíso', documento: '9000000001', correo: 'cliente.paraiso@finca.com', telefono: '3204567890', rol: 'cliente', fincaId: 'ter-2', estado: 'activo' },
+  { id: 'usr-cliente-2', nombre: 'Cliente San José', documento: '9000000002', correo: 'cliente.sanjose@finca.com', telefono: '3157788990', rol: 'cliente', fincaId: 'ter-4', estado: 'activo' }
 ];
 
 const initialFincas = [
@@ -504,6 +507,11 @@ const initialActividades = [
   { id: 'act-4', cultivoId: 'cul-cafe', loteId: 'lot-a', tipoActividad: 'Muestreo de Plagas', descripcion: 'Control focalizado de broca y roya', fecha: '4 días atrás', responsable: 'Carlos Restrepo', estado: 'realizada' }
 ];
 
+const initialQuejas = [
+  { id: 'queja-1', clienteId: 'usr-cliente-1', cliente: 'María Fernanda Ruiz', fincaId: 'ter-2', asunto: 'Baja presión en el sistema de riego', descripcion: 'El riego por goteo del Lote B tiene poca presión desde esta mañana.', fecha: 'Hoy 09:20', estado: 'Pendiente' },
+  { id: 'queja-2', clienteId: 'usr-cliente-2', cliente: 'Pedro Nel Gómez', fincaId: 'ter-4', asunto: 'Revisión de sensor de humedad', descripcion: 'El sensor del lote de cacao muestra la misma lectura desde ayer.', fecha: 'Ayer 16:40', estado: 'En revisión' }
+];
+
 const initialProduccion = [
   { id: 'prod-1', cultivoId: 'cul-cafe', loteId: 'lot-a', terrenoId: 'ter-1', cantidad: 3400, unidadMedida: 'Kg', fechaCosecha: '2024-05-02', calidad: 'Alta (Primera / Exportación)', compradorDestino: 'Cooperativa de Caficultores', rendimientoHa: 283.3 },
   { id: 'prod-2', cultivoId: 'cul-tomate', loteId: 'lot-b', terrenoId: 'ter-2', cantidad: 12000, unidadMedida: 'Kg', fechaCosecha: '2024-05-18', calidad: 'Alta (Primera / Exportación)', compradorDestino: 'Cadena de Supermercados Nacional', rendimientoHa: 1500.0 }
@@ -533,7 +541,9 @@ class StateManager {
 
     // Default session: Juan Díaz (from mockup page 1 & 7) or saved
     const savedSession = JSON.parse(localStorage.getItem('agro_session'));
-    this.currentUser = savedSession || this.users[0];
+    this.currentUser = savedSession
+      ? this.users.find(user => user.id === savedSession.id) || savedSession
+      : this.users[0];
 
     let savedFincas = [];
     try {
@@ -572,9 +582,12 @@ class StateManager {
     this.alertas = JSON.parse(localStorage.getItem('agro_alertas')) || initialAlertas;
     this.actividades = JSON.parse(localStorage.getItem('agro_actividades')) || initialActividades;
     this.produccion = JSON.parse(localStorage.getItem('agro_produccion')) || initialProduccion;
+    this.quejas = JSON.parse(localStorage.getItem('agro_quejas')) || initialQuejas;
     this.bitacoraAudit = JSON.parse(localStorage.getItem('agro_audit')) || [];
 
-    this.selectedFincaId = localStorage.getItem('agro_selected_finca') || 'ter-1';
+    this.selectedFincaId = this.currentUser?.rol === 'cliente' && this.currentUser.fincaId
+      ? this.currentUser.fincaId
+      : localStorage.getItem('agro_selected_finca') || 'ter-1';
     const fincaLotes = this.getLotesForFinca(this.selectedFincaId);
     this.selectedLoteId = (fincaLotes[0] && fincaLotes[0].id) || 'lot-p1';
     this.selectedCultivoId = 'cul-tomate';
@@ -582,6 +595,8 @@ class StateManager {
     this.searchQuery = '';
     this.fincasViewMode = 'tarjetas'; // 'tarjetas' | 'lista'
     this.lotesViewMode = 'mapa'; // 'mapa' | 'lista'
+    this.loteEstadoFilter = '';
+    this.loteCultivoFilter = '';
   }
 
   get currentRole() {
@@ -620,6 +635,7 @@ class StateManager {
     localStorage.setItem('agro_alertas', JSON.stringify(this.alertas));
     localStorage.setItem('agro_actividades', JSON.stringify(this.actividades));
     localStorage.setItem('agro_produccion', JSON.stringify(this.produccion));
+    localStorage.setItem('agro_quejas', JSON.stringify(this.quejas));
     localStorage.setItem('agro_users', JSON.stringify(this.users));
     localStorage.setItem('agro_selected_finca', this.selectedFincaId);
   }
@@ -641,7 +657,16 @@ class StateManager {
     }
 
     this.currentUser = foundUser;
+    this.activeView = 'dashboard';
+    this.loteEstadoFilter = '';
+    this.loteCultivoFilter = '';
+    if (foundUser.rol === 'cliente' && foundUser.fincaId) {
+      this.selectedFincaId = foundUser.fincaId;
+      const fincaLotes = this.getLotesForFinca(foundUser.fincaId);
+      this.selectedLoteId = fincaLotes[0]?.id || '';
+    }
     localStorage.setItem('agro_session', JSON.stringify(foundUser));
+    this.save();
     this.addAuditLog('Autenticación', 'Inicio de Sesión', `Usuario ${foundUser.nombre} ingresó a AgroControl.`);
     return { success: true, user: foundUser };
   }
@@ -659,7 +684,7 @@ function validateForm(event) {
   const invalidField = Array.from(form.elements).find(field =>
     field.willValidate && (
       !field.validity.valid ||
-      (['text', 'email'].includes(field.type) && !field.value.trim())
+      (field.required && typeof field.value === 'string' && !field.value.trim())
     )
   );
   let feedback = form.querySelector('[data-form-feedback]');
@@ -685,7 +710,10 @@ function validateForm(event) {
 
 // Global Window Helpers & Interactions
 window.handleFincaChange = function(fincaId) {
+  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
   state.selectedFincaId = fincaId;
+  state.loteEstadoFilter = '';
+  state.loteCultivoFilter = '';
   const fincaLotes = state.getLotesForFinca(fincaId);
   if (fincaLotes.length > 0) {
     state.selectedLoteId = fincaLotes[0].id;
@@ -697,7 +725,84 @@ window.handleFincaChange = function(fincaId) {
 
 window.handleGlobalSearch = function(query) {
   state.searchQuery = (query || '').toLowerCase().trim();
-  renderCurrentView();
+  renderGlobalSearchResults();
+};
+
+window.openGlobalSearchResult = function(type, id) {
+  const searchInput = document.getElementById('topbar-search-input');
+  if (searchInput) searchInput.value = '';
+  state.searchQuery = '';
+  const results = document.getElementById('global-search-results');
+  if (results) results.innerHTML = '';
+
+  if (type === 'finca') {
+    window.handleFincaChange(id);
+    window.switchView('fincas');
+  } else if (type === 'lote') {
+    const lote = state.lotes.find(item => item.id === id);
+    if (!lote) return;
+    state.selectedFincaId = lote.terrenoId;
+    state.selectedLoteId = lote.id;
+    state.save();
+    renderHeader();
+    window.switchView('terrenos');
+  } else if (type === 'cultivo') {
+    window.switchView('ficha_cultivo', id);
+  } else if (type === 'sensor') {
+    window.switchView('sensores');
+  }
+};
+
+function renderGlobalSearchResults() {
+  const container = document.getElementById('global-search-results');
+  if (!container) return;
+  const query = state.searchQuery;
+  if (!query) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const searchableItems = [
+    ...state.fincas.filter(item => state.currentRole !== 'cliente' || item.id === state.currentUser.fincaId)
+      .map(item => ({ type: 'finca', id: item.id, label: item.nombre, detail: item.ubicacion, icon: 'home' })),
+    ...state.lotes.filter(item => state.currentRole !== 'cliente' || item.terrenoId === state.currentUser.fincaId)
+      .map(item => ({ type: 'lote', id: item.id, label: item.identificador, detail: item.cultivoNombre, icon: 'map' })),
+    ...state.cultivos.filter(item => state.currentRole !== 'cliente' || item.terrenoId === state.currentUser.fincaId)
+      .map(item => ({ type: 'cultivo', id: item.id, label: item.nombre, detail: item.tipoCultivo, icon: 'sprout' })),
+    ...(state.currentRole === 'cliente' ? [] : state.sensores.map(item => ({ type: 'sensor', id: item.id, label: item.codigo, detail: `${item.tipo} · ${item.lote}`, icon: 'cpu' })))
+  ];
+  const matches = searchableItems.filter(item =>
+    `${item.label} ${item.detail}`.toLowerCase().includes(query)
+  ).slice(0, 6);
+
+  container.innerHTML = matches.length
+    ? matches.map(item => `
+      <button type="button" onclick="window.openGlobalSearchResult('${item.type}', '${item.id}')" class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-emerald-50">
+        <i data-lucide="${item.icon}" class="w-4 h-4 text-emerald-700 shrink-0"></i>
+        <span class="min-w-0">
+          <span class="block text-xs font-semibold text-slate-800 truncate">${item.label}</span>
+          <span class="block text-[10px] text-slate-500 truncate">${item.detail}</span>
+        </span>
+      </button>
+    `).join('')
+    : '<p class="px-3 py-3 text-xs text-slate-500" role="status">No se encontraron resultados para esta búsqueda.</p>';
+  if (window.lucide) window.lucide.createIcons();
+}
+
+window.showToast = function(message) {
+  let toast = document.getElementById('app-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    toast.className = 'fixed bottom-4 right-4 z-[60] max-w-sm rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-800 shadow-lg';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.append(toast);
+  }
+  toast.textContent = message;
+  toast.classList.remove('hidden');
+  window.clearTimeout(toast.dismissTimer);
+  toast.dismissTimer = window.setTimeout(() => toast.classList.add('hidden'), 3500);
 };
 
 window.switchView = function(viewId, param = null) {
@@ -725,6 +830,69 @@ window.setLotesViewMode = function(mode) {
   renderCurrentView();
 };
 
+window.setLoteFilters = function(status, crop) {
+  state.loteEstadoFilter = status;
+  state.loteCultivoFilter = crop;
+  renderCurrentView();
+};
+
+window.openComplaintModal = function() {
+  const container = document.getElementById('modal-container');
+  if (!container) return;
+  const bodyHTML = `
+    <form novalidate onsubmit="window.submitComplaint(event)" class="space-y-4">
+      ${renderFarmNameField('complaint-finca')}
+      <div>
+        <label for="complaint-subject" class="block text-xs font-semibold text-slate-700 mb-1">Asunto *</label>
+        <input id="complaint-subject" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="Describe brevemente el problema" />
+      </div>
+      <div>
+        <label for="complaint-description" class="block text-xs font-semibold text-slate-700 mb-1">Detalle *</label>
+        <textarea id="complaint-description" required minlength="10" rows="4" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="Cuéntanos qué sucede en tu finca"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Enviar solicitud</button>
+      </div>
+    </form>
+  `;
+  container.innerHTML = renderModalWrapper('Nueva solicitud de soporte', 'message-square', bodyHTML);
+  if (window.lucide) window.lucide.createIcons();
+};
+
+window.submitComplaint = function(event) {
+  event.preventDefault();
+  if (!validateForm(event)) return;
+  const finca = state.activeFinca;
+  if (!finca || !state.currentUser) return;
+  state.quejas.unshift({
+    id: 'queja-' + Date.now(),
+    clienteId: state.currentUser.id,
+    cliente: state.currentUser.nombre,
+    fincaId: finca.id,
+    fincaNombre: finca.nombre,
+    asunto: document.getElementById('complaint-subject').value.trim(),
+    descripcion: document.getElementById('complaint-description').value.trim(),
+    fecha: new Date().toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }),
+    estado: 'Pendiente'
+  });
+  state.save();
+  window.closeModal();
+  renderCurrentView();
+  initNavigation();
+  window.showToast('Solicitud enviada correctamente.');
+};
+
+window.updateComplaintStatus = function(complaintId, status) {
+  const complaint = state.quejas.find(item => item.id === complaintId);
+  if (!complaint) return;
+  complaint.estado = status;
+  state.save();
+  renderCurrentView();
+  initNavigation();
+  window.showToast(status === 'Resuelta' ? 'Queja marcada como resuelta.' : 'Queja tomada para revisión.');
+};
+
 window.handleLogout = function() {
   state.logout();
   updateUIState();
@@ -746,7 +914,10 @@ function renderHeader() {
   const fincaSelect = document.getElementById('topbar-finca-select');
 
   if (fincaSelect) {
-    fincaSelect.innerHTML = state.fincas.map(f => `
+    const availableFincas = state.currentRole === 'cliente'
+      ? state.fincas.filter(f => f.id === state.currentUser.fincaId)
+      : state.fincas;
+    fincaSelect.innerHTML = availableFincas.map(f => `
       <option value="${f.id}" ${f.id === state.selectedFincaId ? 'selected' : ''}>
         ${f.nombre}
       </option>
@@ -806,17 +977,22 @@ function initNavigation() {
   if (!navContainer) return;
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard activo', icon: 'layout-dashboard' },
-    { id: 'fincas', label: 'Fincas', icon: 'home' },
-    { id: 'terrenos', label: 'Terrenos y lotes', icon: 'map' },
-    { id: 'cultivos', label: 'Cultivos', icon: 'sprout' },
-    { id: 'sensores', label: 'Sensores', icon: 'cpu' },
-    { id: 'clima', label: 'Clima', icon: 'cloud-sun' },
-    { id: 'alertas', label: 'Alertas', icon: 'bell', badge: state.alertas.length },
-    { id: 'actividades', label: 'Actividades', icon: 'calendar-check' },
-    { id: 'produccion', label: 'Producción', icon: 'package' },
-    { id: 'usuarios', label: 'Usuarios', icon: 'users' },
-    { id: 'configuracion', label: 'Configuración', icon: 'settings' }
+    { id: 'dashboard', label: state.currentRole === 'agronomo' ? 'Panel de ingeniería' : state.currentRole === 'cliente' ? 'Mi finca' : state.currentRole === 'tecnico' ? 'Panel técnico' : 'Dashboard activo', icon: 'layout-dashboard' },
+    ...(state.currentRole === 'cliente'
+      ? [{ id: 'quejas', label: 'Mis solicitudes', icon: 'message-square' }]
+      : state.currentRole === 'tecnico'
+        ? [{ id: 'quejas', label: 'Quejas de clientes', icon: 'message-square', badge: state.quejas.filter(q => q.estado !== 'Resuelta').length }, { id: 'sensores', label: 'Sensores', icon: 'cpu' }, { id: 'alertas', label: 'Alertas', icon: 'bell', badge: state.alertas.length }]
+        : [
+          { id: 'fincas', label: 'Fincas', icon: 'home' },
+          { id: 'terrenos', label: 'Terrenos y lotes', icon: 'map' },
+          { id: 'cultivos', label: 'Cultivos', icon: 'sprout' },
+          { id: 'sensores', label: 'Sensores', icon: 'cpu' },
+          { id: 'clima', label: 'Clima', icon: 'cloud-sun' },
+          { id: 'alertas', label: 'Alertas', icon: 'bell', badge: state.alertas.length },
+          { id: 'actividades', label: 'Actividades', icon: 'calendar-check' },
+          { id: 'produccion', label: 'Producción', icon: 'package' },
+          ...(state.currentRole === 'administrador' ? [{ id: 'usuarios', label: 'Usuarios', icon: 'users' }, { id: 'configuracion', label: 'Configuración', icon: 'settings' }] : [])
+        ])
   ];
 
   navContainer.innerHTML = navItems.map(item => {
@@ -824,7 +1000,7 @@ function initNavigation() {
     return `
       <button
         onclick="window.switchView('${item.id}')"
-        class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+        class="w-max md:w-full shrink-0 flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
           isActive
             ? 'bg-[#1B794B] text-white shadow-xs font-bold'
             : 'text-emerald-100/75 hover:text-white hover:bg-white/10'
@@ -869,6 +1045,13 @@ function renderCurrentView() {
   const main = document.getElementById('main-content');
   if (!main) return;
 
+  if (state.currentRole === 'cliente' && !['dashboard', 'quejas'].includes(state.activeView)) {
+    state.activeView = 'dashboard';
+  }
+  if (state.currentRole === 'tecnico' && !['dashboard', 'quejas', 'sensores', 'alertas'].includes(state.activeView)) {
+    state.activeView = 'dashboard';
+  }
+
   switch (state.activeView) {
     case 'dashboard':
       main.innerHTML = renderDashboardView();
@@ -894,6 +1077,9 @@ function renderCurrentView() {
     case 'alertas':
       main.innerHTML = renderAlertasView();
       break;
+    case 'quejas':
+      main.innerHTML = renderQuejasView();
+      break;
     case 'actividades':
       main.innerHTML = renderActividadesView();
       break;
@@ -917,6 +1103,9 @@ function renderCurrentView() {
 // SCREEN 1: DASHBOARD GENERAL (Mockup Page 7)
 // ----------------------------------------------------
 function renderDashboardView() {
+  if (state.currentRole === 'agronomo') return renderEngineerDashboardView();
+  if (state.currentRole === 'cliente') return renderClientDashboardView();
+  if (state.currentRole === 'tecnico') return renderTechnicianDashboardView();
   return `
     <div class="space-y-6">
       <!-- 4 Top KPI Cards (Page 7) -->
@@ -1122,6 +1311,225 @@ function renderDashboardView() {
   `;
 }
 
+function renderEngineerDashboardView() {
+  const finca = state.activeFinca;
+  const lots = state.getLotesForFinca(finca.id);
+  const warnings = state.alertas.filter(alert => alert.severidad === 'Advertencia').length;
+  const openComplaints = state.quejas.filter(complaint => complaint.estado !== 'Resuelta').length;
+  return `
+    <div class="space-y-5">
+      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Panel de Ingeniería Agronómica</p>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900">Resumen de campo</h1>
+          <p class="text-xs text-slate-500 mt-1">${finca.nombre} · ${finca.ubicacion}</p>
+        </div>
+        <button onclick="window.switchView('terrenos')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl">
+          <i data-lucide="map" class="w-4 h-4"></i> Abrir mapa de lotes
+        </button>
+      </header>
+      <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        ${[
+          ['Lotes bajo seguimiento', lots.length, 'map'],
+          ['Sensores activos', finca.sensoresActivos, 'cpu'],
+          ['Alertas por revisar', warnings, 'triangle-alert'],
+          ['Solicitudes de clientes', openComplaints, 'message-square']
+        ].map(([label, value, icon]) => `
+          <article class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+            <i data-lucide="${icon}" class="w-4 h-4 text-emerald-700"></i>
+            <p class="mt-3 text-2xl font-bold text-slate-900">${value}</p>
+            <p class="text-[11px] sm:text-xs text-slate-500">${label}</p>
+          </article>
+        `).join('')}
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <section class="xl:col-span-2 bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="font-bold text-slate-900 text-sm">Condición de los lotes</h2>
+              <p class="text-xs text-slate-500">Lecturas y estado actual de la finca activa</p>
+            </div>
+            <button onclick="window.switchView('terrenos')" class="text-xs font-semibold text-emerald-700">Ver todos</button>
+          </div>
+          <div class="space-y-3">
+            ${lots.slice(0, 4).map(lot => `
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-slate-50">
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-slate-800 truncate">${lot.identificador}</p>
+                  <p class="text-[11px] text-slate-500">${lot.cultivoNombre} · ${lot.area} Ha</p>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                  <span class="font-mono font-semibold ${lot.humedadSuelo < 40 ? 'text-amber-700' : 'text-emerald-700'}">${lot.humedadSuelo}% humedad</span>
+                  <span class="rounded-full px-2 py-1 text-[10px] font-bold ${lot.estado === 'Saludable' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${lot.estado}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+        <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+          <h2 class="font-bold text-slate-900 text-sm">Agenda técnica</h2>
+          <p class="text-xs text-slate-500 mt-1 mb-4">Actividades recientes para dar seguimiento</p>
+          <div class="space-y-3">
+            ${state.actividades.slice(0, 4).map(activity => `
+              <div class="border-l-2 border-emerald-500 pl-3">
+                <p class="text-xs font-semibold text-slate-800">${activity.tipoActividad}</p>
+                <p class="text-[11px] text-slate-500">${activity.descripcion}</p>
+                <p class="text-[10px] text-slate-400 mt-1">${activity.fecha} · ${activity.responsable}</p>
+              </div>
+            `).join('')}
+          </div>
+          <button onclick="window.switchView('alertas')" class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700">
+            Revisar alertas <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </section>
+      </div>
+    </div>
+  `;
+}
+
+function renderClientDashboardView() {
+  const finca = state.activeFinca;
+  const lots = state.getLotesForFinca(finca.id);
+  const myComplaints = state.quejas.filter(complaint => complaint.clienteId === state.currentUser.id);
+  return `
+    <div class="space-y-5">
+      <header class="bg-white rounded-2xl p-5 sm:p-7 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Portal del cliente</p>
+          <h1 class="text-2xl font-bold text-slate-900 mt-1">Hola, ${state.currentUser.nombre}</h1>
+          <p class="text-sm text-slate-600 mt-1">${finca.nombre} · ${finca.ubicacion}</p>
+        </div>
+        <button onclick="window.openComplaintModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl">
+          <i data-lucide="message-square-plus" class="w-4 h-4"></i> Crear solicitud
+        </button>
+      </header>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        ${[
+          ['Área de la finca', `${finca.areaTotal} Ha`, 'land-plot'],
+          ['Lotes', lots.length, 'map'],
+          ['Cultivos activos', finca.cultivosActivos, 'sprout'],
+          ['Solicitudes abiertas', myComplaints.filter(item => item.estado !== 'Resuelta').length, 'messages-square']
+        ].map(([label, value, icon]) => `
+          <article class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <i data-lucide="${icon}" class="w-4 h-4 text-emerald-700"></i>
+            <p class="mt-3 text-xl font-bold text-slate-900">${value}</p>
+            <p class="text-[11px] text-slate-500">${label}</p>
+          </article>
+        `).join('')}
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <section class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+          <h2 class="font-bold text-slate-900 text-sm">Resumen de mi finca</h2>
+          <div class="mt-4 space-y-3">
+            ${lots.slice(0, 4).map(lot => `
+              <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-slate-800 truncate">${lot.identificador}</p>
+                  <p class="text-[11px] text-slate-500">${lot.cultivoNombre} · ${lot.area} Ha</p>
+                </div>
+                <span class="text-xs font-semibold ${lot.humedadSuelo < 40 ? 'text-amber-700' : 'text-emerald-700'}">${lot.humedadSuelo}% humedad</span>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+        <section class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-center gap-3">
+            <div>
+              <h2 class="font-bold text-slate-900 text-sm">Mis solicitudes</h2>
+              <p class="text-xs text-slate-500 mt-1">Consulta el avance de tus reportes al equipo técnico.</p>
+            </div>
+            <button onclick="window.switchView('quejas')" class="text-xs font-semibold text-emerald-700">Ver todas</button>
+          </div>
+          ${myComplaints.length ? myComplaints.slice(0, 3).map(complaint => `
+            <div class="mt-4 border-t border-slate-100 pt-3">
+              <div class="flex justify-between gap-2">
+                <p class="text-xs font-semibold text-slate-800">${complaint.asunto}</p>
+                <span class="shrink-0 text-[10px] font-bold text-emerald-800">${complaint.estado}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">${complaint.fecha}</p>
+            </div>
+          `).join('') : '<p class="text-xs text-slate-500 mt-4">Aún no tienes solicitudes. Si necesitas ayuda, crea una nueva.</p>'}
+        </section>
+      </div>
+    </div>
+  `;
+}
+
+function renderTechnicianDashboardView() {
+  const openCount = state.quejas.filter(complaint => complaint.estado !== 'Resuelta').length;
+  return `
+    <div class="space-y-5">
+      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-indigo-700">Atención de clientes</p>
+          <h1 class="text-2xl font-bold text-slate-900">Panel técnico</h1>
+          <p class="text-xs text-slate-500 mt-1">Revisa y gestiona las quejas recibidas de las fincas.</p>
+        </div>
+        <button onclick="window.switchView('quejas')" class="inline-flex justify-center items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl">
+          <i data-lucide="inbox" class="w-4 h-4"></i> Abrir bandeja
+        </button>
+      </header>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <article class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm"><p class="text-xs text-slate-500">Quejas pendientes</p><p class="text-3xl font-bold text-amber-600 mt-2">${state.quejas.filter(item => item.estado === 'Pendiente').length}</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm"><p class="text-xs text-slate-500">En revisión</p><p class="text-3xl font-bold text-indigo-700 mt-2">${state.quejas.filter(item => item.estado === 'En revisión').length}</p></article>
+        <article class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm"><p class="text-xs text-slate-500">Solicitudes abiertas</p><p class="text-3xl font-bold text-slate-900 mt-2">${openCount}</p></article>
+      </div>
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h2 class="font-bold text-slate-900 text-sm mb-3">Últimas quejas</h2>
+        ${state.quejas.length ? state.quejas.slice(0, 3).map(complaint => `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-t border-slate-100">
+            <div>
+              <p class="text-xs font-semibold text-slate-900">${complaint.asunto}</p>
+              <p class="text-[11px] text-slate-500">${complaint.cliente} · ${complaint.fincaNombre || state.fincas.find(f => f.id === complaint.fincaId)?.nombre || 'Finca'}</p>
+            </div>
+            <span class="text-[10px] font-bold text-slate-600">${complaint.estado}</span>
+          </div>
+        `).join('') : '<p class="text-xs text-slate-500">No hay quejas registradas.</p>'}
+      </section>
+    </div>
+  `;
+}
+
+function renderQuejasView() {
+  const isClient = state.currentRole === 'cliente';
+  const complaints = isClient
+    ? state.quejas.filter(complaint => complaint.clienteId === state.currentUser.id)
+    : state.quejas;
+  return `
+    <div class="space-y-5">
+      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">${isClient ? 'Mis solicitudes de soporte' : 'Quejas de clientes'}</h1>
+          <p class="text-xs text-slate-500 mt-1">${isClient ? 'Consulta el estado de tus solicitudes.' : 'Atiende y actualiza las solicitudes recibidas desde las fincas.'}</p>
+        </div>
+        ${isClient ? `<button onclick="window.openComplaintModal()" class="inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#1B794B] text-white text-xs font-semibold rounded-xl"><i data-lucide="plus" class="w-4 h-4"></i>Nueva solicitud</button>` : ''}
+      </header>
+      <div class="space-y-3">
+        ${complaints.length ? complaints.map(complaint => `
+          <article class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="font-bold text-sm text-slate-900">${complaint.asunto}</h2>
+                  <span class="rounded-full px-2 py-1 text-[10px] font-bold ${complaint.estado === 'Resuelta' ? 'bg-emerald-100 text-emerald-800' : complaint.estado === 'En revisión' ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800'}">${complaint.estado}</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-2">${complaint.descripcion}</p>
+                <p class="text-[11px] text-slate-500 mt-3">${complaint.cliente} · ${state.fincas.find(f => f.id === complaint.fincaId)?.nombre || 'Finca'} · ${complaint.fecha}</p>
+              </div>
+              ${!isClient && complaint.estado !== 'Resuelta' ? `
+                <div class="flex gap-2 shrink-0">
+                  ${complaint.estado === 'Pendiente' ? `<button onclick="window.updateComplaintStatus('${complaint.id}', 'En revisión')" class="px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-semibold">Tomar caso</button>` : ''}
+                  <button onclick="window.updateComplaintStatus('${complaint.id}', 'Resuelta')" class="px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-semibold">Resolver</button>
+                </div>
+              ` : ''}
+            </div>
+          </article>
+        `).join('') : `<div class="bg-white rounded-2xl border border-slate-200 p-8 text-center"><i data-lucide="inbox" class="w-8 h-8 text-slate-300 mx-auto"></i><p class="text-sm font-semibold text-slate-700 mt-3">${isClient ? 'Aún no tienes solicitudes' : 'No hay quejas pendientes'}</p><p class="text-xs text-slate-500 mt-1">${isClient ? 'Crea una solicitud si necesitas ayuda con tu finca.' : 'Cuando un cliente reporte un problema, aparecerá aquí.'}</p></div>`}
+      </div>
+    </div>
+  `;
+}
+
 // ----------------------------------------------------
 // SCREEN 2: MIS FINCAS (Mockup Page 3)
 // ----------------------------------------------------
@@ -1243,7 +1651,8 @@ function renderFincasView() {
         </div>
       ` : `
         <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
-          <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left text-xs">
             <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
               <tr>
                 <th class="p-3.5">Finca</th>
@@ -1280,6 +1689,7 @@ function renderFincasView() {
               `).join('')}
             </tbody>
           </table>
+          </div>
         </div>
       `}
 
@@ -1293,10 +1703,15 @@ function renderFincasView() {
 function renderTerrenosView() {
   const currentFinca = state.activeFinca;
   const fincaLotes = state.getLotesForFinca(currentFinca.id);
+  const visibleLotes = fincaLotes.filter(l =>
+    (!state.loteEstadoFilter ||
+      (state.loteEstadoFilter === 'critico' ? l.estado.includes('Alerta') || l.estado === 'Crítico' : l.estado === state.loteEstadoFilter)) &&
+    (!state.loteCultivoFilter || l.cultivoNombre === state.loteCultivoFilter)
+  );
 
-  let selectedLote = fincaLotes.find(l => l.id === state.selectedLoteId);
+  let selectedLote = visibleLotes.find(l => l.id === state.selectedLoteId);
   if (!selectedLote) {
-    selectedLote = fincaLotes[0] || state.lotes[0];
+    selectedLote = visibleLotes[0] || null;
     if (selectedLote) {
       state.selectedLoteId = selectedLote.id;
     }
@@ -1346,18 +1761,18 @@ function renderTerrenosView() {
           </select>
 
           <!-- Status Filter -->
-          <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
-            <option>Estado (Todos)</option>
-            <option>Saludable</option>
-            <option>Advertencia</option>
-            <option>Crítico / Alerta</option>
+          <select id="lote-estado-filter" onchange="window.setLoteFilters(this.value, document.getElementById('lote-cultivo-filter').value)" class="w-full sm:w-auto px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
+            <option value="" ${!state.loteEstadoFilter ? 'selected' : ''}>Estado (Todos)</option>
+            <option value="Saludable" ${state.loteEstadoFilter === 'Saludable' ? 'selected' : ''}>Saludable</option>
+            <option value="Advertencia" ${state.loteEstadoFilter === 'Advertencia' ? 'selected' : ''}>Advertencia</option>
+            <option value="critico" ${state.loteEstadoFilter === 'critico' ? 'selected' : ''}>Crítico / Alerta</option>
           </select>
 
           <!-- Dynamic Crop Filter -->
-          <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none hidden md:inline-block">
-            <option>Cultivo (Todos)</option>
+          <select id="lote-cultivo-filter" onchange="window.setLoteFilters(document.getElementById('lote-estado-filter').value, this.value)" class="w-full sm:w-auto px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
+            <option value="" ${!state.loteCultivoFilter ? 'selected' : ''}>Cultivo (Todos)</option>
             ${lotCrops.map(crop => `
-              <option value="${crop}">${crop}</option>
+              <option value="${crop}" ${state.loteCultivoFilter === crop ? 'selected' : ''}>${crop}</option>
             `).join('')}
           </select>
 
@@ -1378,10 +1793,13 @@ function renderTerrenosView() {
         </div>
       </div>
 
+      ${visibleLotes.length === 0 ? '<p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800" role="status">No se encontraron lotes con los filtros seleccionados.</p>' : ''}
+
       ${state.lotesViewMode === 'lista' ? `
         <!-- Lots Table View -->
         <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
-          <table class="w-full text-left text-xs">
+          <div class="overflow-x-auto">
+          <table class="w-full min-w-[760px] text-left text-xs">
             <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
               <tr>
                 <th class="p-3.5">Lote / Parcela</th>
@@ -1395,7 +1813,7 @@ function renderTerrenosView() {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              ${fincaLotes.map(l => {
+              ${visibleLotes.map(l => {
                 const isSel = l.id === selectedLote?.id;
                 return `
                   <tr class="hover:bg-slate-50/80 transition-colors ${isSel ? 'bg-emerald-50/40' : ''}">
@@ -1436,6 +1854,7 @@ function renderTerrenosView() {
               }).join('')}
             </tbody>
           </table>
+          </div>
         </div>
       ` : `
         <!-- Main Layout: Map Canvas (Left) + Selected Lot Drawer (Right) -->
@@ -1458,13 +1877,13 @@ function renderTerrenosView() {
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span class="font-bold">${currentFinca.nombre}</span>
                 <span class="text-white/60">·</span>
-                <span class="text-white/80">${fincaLotes.length} lotes mapeados</span>
+                <span class="text-white/80">${visibleLotes.length} lotes mapeados</span>
               </div>
             </div>
 
             <!-- SVG Interactive Lot Polygons dynamically rendered for active Finca -->
             <svg class="absolute inset-0 w-full h-full cursor-pointer z-10" viewBox="0 0 800 500" preserveAspectRatio="none">
-              ${fincaLotes.map(lote => {
+              ${visibleLotes.map(lote => {
                 const isSel = lote.id === selectedLote?.id;
                 let strokeColor = '#16a34a';
                 let fillColor = 'rgba(34, 197, 94, 0.45)';
@@ -1500,7 +1919,7 @@ function renderTerrenosView() {
             <div class="relative z-20 p-4 flex flex-col justify-between h-full pointer-events-none">
               <!-- Interactive Floating Tags -->
               <div class="space-y-2 pointer-events-auto">
-                ${fincaLotes.map(lote => {
+                ${visibleLotes.map(lote => {
                   const isSel = lote.id === selectedLote?.id;
                   let borderClass = 'border-emerald-300';
                   let dotColor = 'bg-emerald-500';
@@ -2141,7 +2560,8 @@ function renderActividadesView() {
       </div>
 
       <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
-        <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto">
+        <table class="w-full min-w-[720px] text-left text-xs">
           <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
             <tr>
               <th class="p-3.5">Labor</th>
@@ -2169,6 +2589,7 @@ function renderActividadesView() {
             `).join('')}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   `;
@@ -2195,7 +2616,8 @@ function renderProduccionView() {
       </div>
 
       <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
-        <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left text-xs">
           <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
             <tr>
               <th class="p-3.5">Fecha</th>
@@ -2225,6 +2647,7 @@ function renderProduccionView() {
             `).join('')}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   `;
@@ -2236,7 +2659,7 @@ function renderUsuariosView() {
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-slate-900">Usuarios y Permisos</h1>
-          <p class="text-xs text-slate-500 mt-0.5">Control de acceso basado en roles (Agrónomo, Administrador, Técnico, Operario).</p>
+          <p class="text-xs text-slate-500 mt-0.5">Control de acceso por perfil: ingeniería, cliente, técnico, operario y administración.</p>
         </div>
         <button onclick="window.openNewUserModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2">
           <i data-lucide="plus" class="w-4 h-4"></i>
@@ -2245,13 +2668,15 @@ function renderUsuariosView() {
       </div>
 
       <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
-        <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto">
+        <table class="w-full min-w-[720px] text-left text-xs">
           <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
             <tr>
               <th class="p-3.5">Nombre</th>
               <th class="p-3.5">Correo</th>
               <th class="p-3.5">Documento</th>
               <th class="p-3.5">Rol</th>
+              <th class="p-3.5">Finca</th>
               <th class="p-3.5">Estado</th>
               <th class="p-3.5 text-right">Sesión Rápida</th>
             </tr>
@@ -2267,6 +2692,7 @@ function renderUsuariosView() {
                     ${u.rol}
                   </span>
                 </td>
+                <td class="p-3.5 text-slate-600">${state.fincas.find(finca => finca.id === u.fincaId)?.nombre || '—'}</td>
                 <td class="p-3.5">
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${u.estado === 'activo' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">
                     ${u.estado}
@@ -2281,10 +2707,99 @@ function renderUsuariosView() {
             `).join('')}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   `;
 }
+
+window.openNewUserModal = function() {
+  const container = document.getElementById('modal-container');
+  if (!container) return;
+  const farmOptions = state.fincas.map(finca => `<option value="${finca.id}">${finca.nombre}</option>`).join('');
+  const bodyHTML = `
+    <form novalidate onsubmit="window.saveNewAppUser(event)" class="space-y-4">
+      <div>
+        <label for="app-user-name" class="block text-xs font-semibold text-slate-700 mb-1">Nombre completo *</label>
+        <input id="app-user-name" name="nombre" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="app-user-document" class="block text-xs font-semibold text-slate-700 mb-1">Documento *</label>
+          <input id="app-user-document" name="documento" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+        <div>
+          <label for="app-user-email" class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico *</label>
+          <input id="app-user-email" name="correo" type="email" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="app-user-role" class="block text-xs font-semibold text-slate-700 mb-1">Rol *</label>
+          <select id="app-user-role" name="rol" required onchange="document.getElementById('app-user-farm-field').classList.toggle('hidden', this.value !== 'cliente'); document.getElementById('app-user-farm').required = this.value === 'cliente'" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            <option value="cliente">Cliente (finca)</option>
+            <option value="tecnico">Técnico (quejas)</option>
+            <option value="agronomo">Ingeniero agrónomo</option>
+            <option value="operario">Operario</option>
+            <option value="administrador">Administrador</option>
+          </select>
+        </div>
+        <div id="app-user-farm-field">
+          <label for="app-user-farm" class="block text-xs font-semibold text-slate-700 mb-1">Finca asignada *</label>
+          <select id="app-user-farm" name="fincaId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            <option value="">Selecciona una finca</option>
+            ${farmOptions}
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Registrar usuario</button>
+      </div>
+    </form>
+  `;
+  container.innerHTML = renderModalWrapper('Registrar Usuario', 'user-plus', bodyHTML);
+  if (window.lucide) window.lucide.createIcons();
+};
+
+window.saveNewAppUser = function(event) {
+  event.preventDefault();
+  if (!validateForm(event)) return;
+  const form = event.currentTarget;
+  const nombre = form.elements.nombre.value.trim();
+  const documento = form.elements.documento.value.trim();
+  const correo = form.elements.correo.value.trim().toLowerCase();
+  const duplicate = state.users.some(user =>
+    user.documento === documento || user.correo?.toLowerCase() === correo
+  );
+  if (duplicate) {
+    let feedback = form.querySelector('[data-form-feedback]');
+    if (!feedback) {
+      feedback = document.createElement('p');
+      feedback.dataset.formFeedback = '';
+      feedback.className = 'text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2';
+      feedback.setAttribute('role', 'alert');
+      form.prepend(feedback);
+    }
+    feedback.textContent = 'Ya existe un usuario con ese documento o correo.';
+    return;
+  }
+  const role = form.elements.rol.value;
+  state.users.push({
+    id: 'usr-' + Date.now(),
+    nombre,
+    documento,
+    correo,
+    telefono: '',
+    rol: role,
+    ...(role === 'cliente' ? { fincaId: form.elements.fincaId.value } : {}),
+    estado: 'activo'
+  });
+  state.save();
+  window.closeModal();
+  renderCurrentView();
+  window.showToast('Registro exitoso. El usuario quedó creado correctamente.');
+};
 
 function renderConfiguracionView() {
   return `
@@ -2393,12 +2908,16 @@ function renderLoginScreen() {
           <p id="login-feedback" class="hidden text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2" role="status" aria-live="polite"></p>
 
           <!-- Quick Presets for Evaluation -->
-          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
             <span>Acceso rápido:</span>
-            <div class="flex gap-1.5">
+            <div class="flex flex-wrap gap-x-1.5 gap-y-1">
               <button type="button" onclick="window.quickLogin('juan.diaz@agrocontrol.io')" class="font-bold text-emerald-700 hover:underline">Juan (Agrónomo)</button>
               <span>·</span>
               <button type="button" onclick="window.quickLogin('carlos.restrepo@sena.edu.co')" class="font-bold text-emerald-700 hover:underline">Carlos (Admin)</button>
+              <span>·</span>
+              <button type="button" onclick="window.quickLogin('juan.perez@agrocontrol.io')" class="font-bold text-indigo-700 hover:underline">Técnico</button>
+              <span>·</span>
+              <button type="button" onclick="window.quickLogin('cliente.paraiso@finca.com')" class="font-bold text-amber-700 hover:underline">Cliente</button>
             </div>
           </div>
         </form>
@@ -2705,6 +3224,7 @@ window.saveNewFincaSubmit = function(event) {
     window.closeModal();
     renderHeader();
     renderCurrentView();
+    window.showToast('Registro exitoso: finca creada correctamente.');
   }
 };
 
@@ -2714,6 +3234,7 @@ window.openNewLoteModal = function() {
 
   const bodyHTML = `
     <form novalidate onsubmit="window.saveNewLoteSubmit(event)" class="space-y-4">
+      ${renderFarmNameField('new-lote-finca')}
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Identificador del Lote *</label>
         <input type="text" id="new-lote-id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" placeholder="ej. Lote E - Cafetal Sur" />
@@ -2767,7 +3288,374 @@ window.saveNewLoteSubmit = function(event) {
     state.save();
     window.closeModal();
     renderCurrentView();
+    window.showToast('Registro exitoso: lote creado correctamente.');
   }
+};
+
+function getTodayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function renderFarmNameField(id, fincaNombre = state.activeFinca?.nombre || '') {
+  return `
+    <div>
+      <label for="${id}" class="block text-xs font-semibold text-slate-700 mb-1">Nombre de la finca</label>
+      <input id="${id}" name="fincaNombre" value="${fincaNombre}" readonly aria-readonly="true" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600 cursor-not-allowed" />
+    </div>
+  `;
+}
+
+function getFincaNombreForLote(lote) {
+  return state.fincas.find(item => item.id === lote?.terrenoId)?.nombre || state.activeFinca?.nombre || '';
+}
+
+function getLoteOptions(selectedId = '') {
+  return state.getLotesForFinca(state.selectedFincaId).map(lote => `
+    <option value="${lote.id}" ${lote.id === selectedId ? 'selected' : ''}>
+      ${lote.identificador} · ${lote.cultivoNombre}
+    </option>
+  `).join('');
+}
+
+function openRegistrationModal(title, icon, formHTML) {
+  const container = document.getElementById('modal-container');
+  if (!container) return;
+  container.innerHTML = renderModalWrapper(title, icon, formHTML);
+  if (window.lucide) window.lucide.createIcons();
+}
+
+window.openNewCultivoModal = function() {
+  const lotes = state.getLotesForFinca(state.selectedFincaId);
+  const today = getTodayDate();
+  const bodyHTML = `
+    <form novalidate onsubmit="window.saveNewCultivoSubmit(event)" class="space-y-4">
+      ${renderFarmNameField('new-cul-finca')}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-cul-nombre" class="block text-xs font-semibold text-slate-700 mb-1">Nombre del cultivo *</label>
+          <input id="new-cul-nombre" name="nombre" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="ej. Café" />
+        </div>
+        <div>
+          <label for="new-cul-variedad" class="block text-xs font-semibold text-slate-700 mb-1">Variedad *</label>
+          <input id="new-cul-variedad" name="variedad" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="ej. Castillo" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-cul-tipo" class="block text-xs font-semibold text-slate-700 mb-1">Tipo de cultivo *</label>
+          <select id="new-cul-tipo" name="tipoCultivo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            <option value="Hortaliza">Hortaliza</option>
+            <option value="Perenne">Perenne</option>
+            <option value="Cereal">Cereal</option>
+            <option value="Tubérculo">Tubérculo</option>
+            <option value="Frutal">Frutal</option>
+          </select>
+        </div>
+        <div>
+          <label for="new-cul-lote" class="block text-xs font-semibold text-slate-700 mb-1">Lote asignado *</label>
+          <select id="new-cul-lote" name="loteId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            ${lotes.map(lote => `<option value="${lote.id}">${lote.identificador}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-cul-area" class="block text-xs font-semibold text-slate-700 mb-1">Área sembrada (Ha) *</label>
+          <input id="new-cul-area" name="area" type="number" min="0.1" step="0.1" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+        <div>
+          <label for="new-cul-density" class="block text-xs font-semibold text-slate-700 mb-1">Densidad de plantas</label>
+          <input id="new-cul-density" name="densidad" type="number" min="0" step="1" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-cul-siembra" class="block text-xs font-semibold text-slate-700 mb-1">Fecha de siembra *</label>
+          <input id="new-cul-siembra" name="fechaSiembra" type="date" value="${today}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+        <div>
+          <label for="new-cul-cosecha" class="block text-xs font-semibold text-slate-700 mb-1">Cosecha estimada *</label>
+          <input id="new-cul-cosecha" name="fechaCosecha" type="date" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+      </div>
+      <div>
+        <label for="new-cul-notas" class="block text-xs font-semibold text-slate-700 mb-1">Observaciones</label>
+        <textarea id="new-cul-notas" name="notas" rows="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Guardar cultivo</button>
+      </div>
+    </form>
+  `;
+  openRegistrationModal('Registrar Cultivo', 'sprout', bodyHTML);
+};
+
+window.saveNewCultivoSubmit = function(event) {
+  event.preventDefault();
+  if (!validateForm(event)) return;
+  const form = event.currentTarget;
+  const lote = state.getLotesForFinca(state.selectedFincaId).find(item => item.id === form.elements.loteId.value);
+  if (!lote) {
+    window.showToast('Selecciona un lote válido para el cultivo.');
+    return;
+  }
+  const nombre = form.elements.nombre.value.trim();
+  const cultivo = {
+    id: 'cul-' + Date.now(),
+    terrenoId: lote.terrenoId,
+    fincaNombre: getFincaNombreForLote(lote),
+    loteId: lote.id,
+    loteNombre: lote.identificador,
+    nombre,
+    tipoCultivo: form.elements.tipoCultivo.value,
+    variedad: form.elements.variedad.value.trim(),
+    fechaSiembra: form.elements.fechaSiembra.value,
+    fechaCosechaEstimada: form.elements.fechaCosecha.value,
+    areaSembrada: Number(form.elements.area.value),
+    densidadPlantas: Number(form.elements.densidad.value) || 0,
+    etapaCrecimiento: 'Desarrollo',
+    estado: 'Saludable',
+    humedad: lote.humedadSuelo,
+    temperatura: '—',
+    radiacion: '—',
+    ph: 6.0,
+    notas: form.elements.notas.value.trim() || 'Cultivo registrado recientemente.'
+  };
+  state.cultivos.unshift(cultivo);
+  lote.cultivoNombre = nombre;
+  state.addAuditLog('Cultivos', 'Registro', `Cultivo ${nombre} agregado a ${lote.identificador}.`);
+  state.save();
+  window.closeModal();
+  renderCurrentView();
+  window.showToast('Registro exitoso: cultivo creado correctamente.');
+};
+
+window.openNewActividadModal = function(cultivoId = '') {
+  const cultivo = state.cultivos.find(item => item.id === cultivoId);
+  const loteInicial = cultivo?.loteId || state.selectedLoteId;
+  const bodyHTML = `
+    <form novalidate onsubmit="window.saveNewActividadSubmit(event)" class="space-y-4">
+      ${renderFarmNameField('new-act-finca')}
+      <div>
+        <label for="new-act-tipo" class="block text-xs font-semibold text-slate-700 mb-1">Tipo de actividad *</label>
+        <select id="new-act-tipo" name="tipo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          <option value="Riego">Riego</option>
+          <option value="Fertilización">Fertilización</option>
+          <option value="Inspección">Inspección</option>
+          <option value="Poda">Poda</option>
+          <option value="Control fitosanitario">Control fitosanitario</option>
+          <option value="Otra labor">Otra labor</option>
+        </select>
+      </div>
+      <div>
+        <label for="new-act-lote" class="block text-xs font-semibold text-slate-700 mb-1">Lote *</label>
+        <select id="new-act-lote" name="loteId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">${getLoteOptions(loteInicial)}</select>
+      </div>
+      <div>
+        <label for="new-act-description" class="block text-xs font-semibold text-slate-700 mb-1">Descripción *</label>
+        <textarea id="new-act-description" name="descripcion" required minlength="3" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="Describe la labor realizada"></textarea>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-act-date" class="block text-xs font-semibold text-slate-700 mb-1">Fecha *</label>
+          <input id="new-act-date" name="fecha" type="date" value="${getTodayDate()}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+        <div>
+          <label for="new-act-owner" class="block text-xs font-semibold text-slate-700 mb-1">Responsable *</label>
+          <input id="new-act-owner" name="responsable" value="${state.currentUser?.nombre || ''}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Guardar actividad</button>
+      </div>
+    </form>
+  `;
+  openRegistrationModal('Registrar Actividad', 'calendar-check', bodyHTML);
+};
+
+window.saveNewActividadSubmit = function(event) {
+  event.preventDefault();
+  if (!validateForm(event)) return;
+  const form = event.currentTarget;
+  const lote = state.lotes.find(item => item.id === form.elements.loteId.value) ||
+    initialLotes.find(item => item.id === form.elements.loteId.value);
+  if (!lote) {
+    window.showToast('Selecciona un lote válido para la actividad.');
+    return;
+  }
+  const cultivo = state.cultivos.find(item => item.loteId === lote.id);
+  const actividad = {
+    id: 'act-' + Date.now(),
+    cultivoId: cultivo?.id || '',
+    loteId: lote.identificador,
+    terrenoId: lote.terrenoId,
+    fincaNombre: getFincaNombreForLote(lote),
+    tipoActividad: form.elements.tipo.value,
+    descripcion: form.elements.descripcion.value.trim(),
+    fecha: form.elements.fecha.value,
+    responsable: form.elements.responsable.value.trim(),
+    estado: 'realizada'
+  };
+  state.actividades.unshift(actividad);
+  state.addAuditLog('Actividades', 'Registro', `${actividad.tipoActividad} registrada en ${lote.identificador}.`);
+  state.save();
+  window.closeModal();
+  renderCurrentView();
+  window.showToast('Registro exitoso: actividad guardada correctamente.');
+};
+
+window.openNewSensorModal = function() {
+  const bodyHTML = `
+    <form novalidate onsubmit="window.saveNewSensorSubmit(event)" class="space-y-4">
+      ${renderFarmNameField('new-sensor-finca')}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-sensor-code" class="block text-xs font-semibold text-slate-700 mb-1">Código del sensor *</label>
+          <input id="new-sensor-code" name="codigo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="ej. SEN-H01" />
+        </div>
+        <div>
+          <label for="new-sensor-type" class="block text-xs font-semibold text-slate-700 mb-1">Tipo de sensor *</label>
+          <select id="new-sensor-type" name="tipo" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            <option>Humedad de Suelo</option>
+            <option>Temperatura Suelo</option>
+            <option>Radiación Solar</option>
+            <option>pH y Conductividad</option>
+            <option>Estación Meteorológica</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="new-sensor-lote" class="block text-xs font-semibold text-slate-700 mb-1">Lote *</label>
+        <select id="new-sensor-lote" name="loteId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">${getLoteOptions()}</select>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-sensor-value" class="block text-xs font-semibold text-slate-700 mb-1">Lectura actual *</label>
+          <input id="new-sensor-value" name="valor" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="ej. 58%" />
+        </div>
+        <div>
+          <label for="new-sensor-battery" class="block text-xs font-semibold text-slate-700 mb-1">Batería (%) *</label>
+          <input id="new-sensor-battery" name="bateria" type="number" min="0" max="100" value="100" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Guardar sensor</button>
+      </div>
+    </form>
+  `;
+  openRegistrationModal('Registrar Sensor', 'cpu', bodyHTML);
+};
+
+window.saveNewSensorSubmit = function(event) {
+  event.preventDefault();
+  if (!validateForm(event)) return;
+  const form = event.currentTarget;
+  const codigo = form.elements.codigo.value.trim();
+  if (state.sensores.some(sensor => sensor.codigo.toLowerCase() === codigo.toLowerCase())) {
+    window.showToast('Ya existe un sensor con ese código.');
+    form.elements.codigo.focus();
+    return;
+  }
+  const lote = state.getLotesForFinca(state.selectedFincaId).find(item => item.id === form.elements.loteId.value);
+  if (!lote) {
+    window.showToast('Selecciona un lote válido para el sensor.');
+    return;
+  }
+  state.sensores.unshift({
+    id: 'sens-' + Date.now(),
+    codigo,
+    tipo: form.elements.tipo.value,
+    lote: `${lote.identificador} (${lote.cultivoNombre})`,
+    loteId: lote.id,
+    terrenoId: lote.terrenoId,
+    fincaNombre: getFincaNombreForLote(lote),
+    valor: form.elements.valor.value.trim(),
+    estado: 'Normal',
+    bateria: Number(form.elements.bateria.value),
+    senal: 'Fuerte (-65 dBm)'
+  });
+  lote.sensoresCount = Number(lote.sensoresCount || 0) + 1;
+  const finca = state.fincas.find(item => item.id === lote.terrenoId);
+  if (finca) finca.sensoresActivos = Number(finca.sensoresActivos || 0) + 1;
+  state.addAuditLog('Sensores', 'Registro', `Sensor ${codigo} asociado a ${lote.identificador}.`);
+  state.save();
+  window.closeModal();
+  renderCurrentView();
+  window.showToast('Registro exitoso: sensor agregado correctamente.');
+};
+
+window.openNewProduccionModal = function() {
+  const bodyHTML = `
+    <form novalidate onsubmit="window.saveNewProduccionSubmit(event)" class="space-y-4">
+      ${renderFarmNameField('new-prod-finca')}
+      <div>
+        <label for="new-prod-lote" class="block text-xs font-semibold text-slate-700 mb-1">Lote cosechado *</label>
+        <select id="new-prod-lote" name="loteId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">${getLoteOptions()}</select>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="new-prod-quantity" class="block text-xs font-semibold text-slate-700 mb-1">Cantidad (Kg) *</label>
+          <input id="new-prod-quantity" name="cantidad" type="number" min="0.1" step="0.1" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+        <div>
+          <label for="new-prod-date" class="block text-xs font-semibold text-slate-700 mb-1">Fecha de cosecha *</label>
+          <input id="new-prod-date" name="fecha" type="date" value="${getTodayDate()}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+        </div>
+      </div>
+      <div>
+        <label for="new-prod-quality" class="block text-xs font-semibold text-slate-700 mb-1">Calidad *</label>
+        <select id="new-prod-quality" name="calidad" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          <option>Alta (Primera / Exportación)</option>
+          <option>Media (Segunda / Nacional)</option>
+          <option>Estándar / Procesamiento</option>
+        </select>
+      </div>
+      <div>
+        <label for="new-prod-destination" class="block text-xs font-semibold text-slate-700 mb-1">Comprador o destino *</label>
+        <input id="new-prod-destination" name="destino" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Guardar cosecha</button>
+      </div>
+    </form>
+  `;
+  openRegistrationModal('Registrar Cosecha', 'package', bodyHTML);
+};
+
+window.saveNewProduccionSubmit = function(event) {
+  event.preventDefault();
+  if (!validateForm(event)) return;
+  const form = event.currentTarget;
+  const lote = state.getLotesForFinca(state.selectedFincaId).find(item => item.id === form.elements.loteId.value);
+  if (!lote) {
+    window.showToast('Selecciona un lote válido para la cosecha.');
+    return;
+  }
+  const cantidad = Number(form.elements.cantidad.value);
+  const cultivo = state.cultivos.find(item => item.loteId === lote.id);
+  const finca = state.fincas.find(item => item.id === lote.terrenoId);
+  state.produccion.unshift({
+    id: 'prod-' + Date.now(),
+    cultivoId: cultivo?.id || '',
+    loteId: lote.identificador,
+    terrenoId: lote.terrenoId,
+    fincaNombre: finca?.nombre || getFincaNombreForLote(lote),
+    cantidad,
+    unidadMedida: 'Kg',
+    fechaCosecha: form.elements.fecha.value,
+    calidad: form.elements.calidad.value,
+    compradorDestino: form.elements.destino.value.trim(),
+    rendimientoHa: lote.area > 0 ? Number((cantidad / lote.area).toFixed(1)) : 0
+  });
+  state.addAuditLog('Producción', 'Registro', `Cosecha de ${cantidad} Kg registrada en ${lote.identificador}.`);
+  state.save();
+  window.closeModal();
+  renderCurrentView();
+  window.showToast('Registro exitoso: cosecha agregada correctamente.');
 };
 
 window.openProgramarRiegoModal = function(loteNombre) {
@@ -2776,6 +3664,7 @@ window.openProgramarRiegoModal = function(loteNombre) {
 
   const bodyHTML = `
     <form novalidate onsubmit="window.saveProgramarRiegoSubmit(event, '${loteNombre}')" class="space-y-4">
+      ${renderFarmNameField('riego-finca')}
       <div class="p-3 bg-emerald-50 rounded-xl text-xs text-emerald-800">
         Programando riego de precisión para <strong>${loteNombre}</strong> mediante electrobomba automatizada.
       </div>
@@ -2803,13 +3692,20 @@ window.openProgramarRiegoModal = function(loteNombre) {
 window.saveProgramarRiegoSubmit = function(event, loteNombre) {
   event.preventDefault();
   if (!validateForm(event)) return;
+  const lote = state.getLotesForFinca(state.selectedFincaId).find(item => item.identificador === loteNombre);
+  if (!lote) {
+    window.showToast('No se encontró el lote para programar el riego.');
+    return;
+  }
   const minutos = document.getElementById('riego-minutos').value;
   const hora = document.getElementById('riego-hora').value;
 
   state.actividades.unshift({
     id: 'act-' + Date.now(),
-    cultivoId: 'cul-tomate',
+    cultivoId: state.cultivos.find(item => item.loteId === lote.id)?.id || '',
     loteId: loteNombre,
+    terrenoId: lote.terrenoId,
+    fincaNombre: getFincaNombreForLote(lote),
     tipoActividad: 'Riego Programado',
     descripcion: `Riego por goteo (${minutos} min a las ${hora})`,
     fecha: 'Hoy ' + hora,
@@ -2821,6 +3717,7 @@ window.saveProgramarRiegoSubmit = function(event, loteNombre) {
   state.save();
   window.closeModal();
   renderCurrentView();
+  window.showToast('Riego programado correctamente.');
 };
 
 // Update Producción Modal (RF-034 preserved)
@@ -2830,9 +3727,14 @@ window.editProduccionModal = function(prodId) {
 
   const prod = state.produccion.find(p => p.id === prodId);
   if (!prod) return;
+  const fincaNombre = prod.fincaNombre ||
+    state.fincas.find(item => item.id === prod.terrenoId)?.nombre ||
+    state.activeFinca?.nombre ||
+    '';
 
   const bodyHTML = `
     <form novalidate onsubmit="window.updateProduccionSubmit(event, '${prod.id}')" class="space-y-4">
+      ${renderFarmNameField('edit-prod-finca', fincaNombre)}
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Cantidad Cosechada (Kg) *</label>
@@ -2883,6 +3785,7 @@ window.updateProduccionSubmit = function(event, prodId) {
   state.save();
   window.closeModal();
   renderCurrentView();
+  window.showToast('Producción actualizada correctamente.');
 };
 
 // Update Cultivo Modal (RF-019 preserved)
@@ -2892,9 +3795,14 @@ window.editCultivoModal = function(cultivoId) {
 
   const c = state.cultivos.find(item => item.id === cultivoId);
   if (!c) return;
+  const fincaNombre = c.fincaNombre ||
+    state.fincas.find(item => item.id === c.terrenoId)?.nombre ||
+    state.activeFinca?.nombre ||
+    '';
 
   const bodyHTML = `
     <form novalidate onsubmit="window.updateCultivoSubmit(event, '${c.id}')" class="space-y-4">
+      ${renderFarmNameField('edit-cul-finca', fincaNombre)}
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre del Cultivo *</label>
         <input type="text" id="edit-cul-nombre" value="${c.nombre}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
@@ -2946,6 +3854,7 @@ window.updateCultivoSubmit = function(event, cultivoId) {
   state.save();
   window.closeModal();
   renderCurrentView();
+  window.showToast('Cultivo actualizado correctamente.');
 };
 
 window.exportCSVAction = function() {
