@@ -654,6 +654,35 @@ class StateManager {
 
 const state = new StateManager();
 
+function validateForm(event) {
+  const form = event.currentTarget;
+  const invalidField = Array.from(form.elements).find(field =>
+    field.willValidate && (
+      !field.validity.valid ||
+      (['text', 'email'].includes(field.type) && !field.value.trim())
+    )
+  );
+  let feedback = form.querySelector('[data-form-feedback]');
+
+  if (!feedback) {
+    feedback = document.createElement('p');
+    feedback.dataset.formFeedback = '';
+    feedback.className = 'text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2';
+    feedback.setAttribute('role', 'alert');
+    form.prepend(feedback);
+  }
+
+  if (invalidField) {
+    const label = invalidField.labels?.[0]?.textContent.trim().replace(/\s*\*$/, '');
+    feedback.textContent = label ? `Revisa el campo "${label}".` : 'Revisa los campos obligatorios.';
+    invalidField.focus();
+    return false;
+  }
+
+  feedback.remove();
+  return true;
+}
+
 // Global Window Helpers & Interactions
 window.handleFincaChange = function(fincaId) {
   state.selectedFincaId = fincaId;
@@ -1203,9 +1232,8 @@ function renderFincasView() {
                     <button onclick="window.handleFincaChange('${f.id}')" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">
                       ${isSelected ? 'Seleccionada' : 'Seleccionar finca'}
                     </button>
-                    <button onclick="window.openFincaDetailModal('${f.id}')" class="text-xs text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 px-2 py-1 rounded-lg font-semibold transition-colors flex items-center gap-1 cursor-pointer" title="Ver información técnica y lotes de ${f.nombre}">
-                      <span>Ver detalles</span>
-                      <span class="text-slate-400">···</span>
+                    <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer" title="Ver información técnica y lotes de ${f.nombre}" aria-label="Ver detalles de ${f.nombre}">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
                   </div>
                 </div>
@@ -1241,11 +1269,11 @@ function renderFincasView() {
                     </span>
                   </td>
                   <td class="p-3.5 text-right space-x-1">
-                    <button onclick="window.openFincaDetailModal('${f.id}')" class="px-2.5 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-colors">
-                      Ver detalles
+                    <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors" title="Ver detalles" aria-label="Ver detalles de ${f.nombre}">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="window.handleFincaChange('${f.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
-                      ${f.id === state.selectedFincaId ? 'Activa' : 'Seleccionar'}
+                    <button onclick="window.handleFincaChange('${f.id}')" class="p-2 ${f.id === state.selectedFincaId ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'} rounded-lg transition-colors" title="${f.id === state.selectedFincaId ? 'Finca activa' : 'Seleccionar finca'}" aria-label="${f.id === state.selectedFincaId ? 'Finca activa' : `Seleccionar ${f.nombre}`}">
+                      <i data-lucide="${f.id === state.selectedFincaId ? 'check' : 'check-circle'}" class="w-4 h-4"></i>
                     </button>
                   </td>
                 </tr>
@@ -1396,11 +1424,11 @@ function renderTerrenosView() {
                       </span>
                     </td>
                     <td class="p-3.5 text-right space-x-1">
-                      <button onclick="window.selectLote('${l.id}'); window.setLotesViewMode('mapa');" class="px-2.5 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-colors">
-                        Ver en mapa
+                      <button onclick="window.selectLote('${l.id}'); window.setLotesViewMode('mapa');" class="p-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors" title="Ver en mapa" aria-label="Ver ${l.identificador} en el mapa">
+                        <i data-lucide="map" class="w-4 h-4"></i>
                       </button>
-                      <button onclick="window.openProgramarRiegoModal('${l.identificador}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
-                        Riego
+                      <button onclick="window.openProgramarRiegoModal('${l.identificador}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors" title="Programar riego" aria-label="Programar riego para ${l.identificador}">
+                        <i data-lucide="droplets" class="w-4 h-4"></i>
                       </button>
                     </td>
                   </tr>
@@ -1733,8 +1761,8 @@ function renderCultivosView() {
                       <td class="p-3.5 font-mono text-slate-600">${c.fechaCosechaEstimada}</td>
                       <td class="p-3.5 text-right">
                         <div class="flex items-center justify-end gap-1.5">
-                          <button onclick="window.switchView('ficha_cultivo', '${c.id}')" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[11px] font-semibold transition-colors" title="Ver Ficha de Cultivo (Mockup Page 6)">
-                            Ficha
+                          <button onclick="window.switchView('ficha_cultivo', '${c.id}')" class="p-1 text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors" title="Ver ficha de cultivo" aria-label="Ver ficha de ${c.nombre}">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
                           </button>
                           <button onclick="window.editCultivoModal('${c.id}')" class="p-1 text-slate-400 hover:text-indigo-600 rounded-lg" title="Editar Cultivo (RF-019)">
                             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
@@ -2189,9 +2217,8 @@ function renderProduccionView() {
                 <td class="p-3.5 text-slate-600">${p.calidad}</td>
                 <td class="p-3.5 text-slate-600">${p.compradorDestino}</td>
                 <td class="p-3.5 text-right">
-                  <button onclick="window.editProduccionModal('${p.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-emerald-800 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1">
-                    <i data-lucide="edit-3" class="w-3 h-3 text-emerald-600"></i>
-                    Actualizar
+                  <button onclick="window.editProduccionModal('${p.id}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-emerald-800 rounded-lg transition-colors" title="Actualizar producción" aria-label="Actualizar producción de ${p.loteId}">
+                    <i data-lucide="edit-3" class="w-4 h-4 text-emerald-600"></i>
                   </button>
                 </td>
               </tr>
@@ -2319,7 +2346,7 @@ function renderLoginScreen() {
           </div>
         </div>
 
-        <form onsubmit="window.handleLoginFormSubmit(event)" class="space-y-4">
+        <form novalidate onsubmit="window.handleLoginFormSubmit(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico</label>
             <div class="relative">
@@ -2338,7 +2365,7 @@ function renderLoginScreen() {
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-semibold text-slate-700">Contraseña</label>
-              <button type="button" onclick="alert('Funcionalidad de recuperación de contraseña habilitada. Revise su bandeja.')" class="text-[11px] text-emerald-700 hover:underline">
+              <button type="button" onclick="window.showLoginMessage('La recuperación de contraseña estará disponible próximamente.')" class="text-[11px] text-emerald-700 hover:underline">
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
@@ -2363,6 +2390,7 @@ function renderLoginScreen() {
           <button type="submit" class="w-full py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white font-bold text-xs rounded-xl shadow-xs transition-all">
             Iniciar sesión
           </button>
+          <p id="login-feedback" class="hidden text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2" role="status" aria-live="polite"></p>
 
           <!-- Quick Presets for Evaluation -->
           <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
@@ -2377,7 +2405,7 @@ function renderLoginScreen() {
 
         <div class="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
           <span>¿Aún no tienes cuenta?</span>
-          <button type="button" onclick="alert('Registro abierto para nuevos operarios y agrónomos.')" class="font-bold text-emerald-700 hover:underline ml-1">
+          <button type="button" onclick="window.showLoginMessage('El registro de nuevos usuarios estará disponible próximamente.')" class="font-bold text-emerald-700 hover:underline ml-1">
             Regístrate aquí.
           </button>
         </div>
@@ -2411,10 +2439,23 @@ function renderLoginScreen() {
 
 window.handleLoginFormSubmit = function(event) {
   event.preventDefault();
+  if (!validateForm(event)) return;
   const emailInput = document.getElementById('login-email');
   if (emailInput) {
     const res = state.login(emailInput.value);
-    if (res.success) updateUIState();
+    if (res.success) {
+      updateUIState();
+    } else {
+      window.showLoginMessage(res.message);
+    }
+  }
+};
+
+window.showLoginMessage = function(message) {
+  const feedback = document.getElementById('login-feedback');
+  if (feedback) {
+    feedback.textContent = message;
+    feedback.classList.remove('hidden');
   }
 };
 
@@ -2606,7 +2647,7 @@ window.openNewFincaModal = function() {
   if (!container) return;
 
   const bodyHTML = `
-    <form onsubmit="window.saveNewFincaSubmit(event)" class="space-y-4">
+    <form novalidate onsubmit="window.saveNewFincaSubmit(event)" class="space-y-4">
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre de la Finca *</label>
         <input type="text" id="new-finca-nombre" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" placeholder="ej. Finca Santa Bárbara" />
@@ -2618,7 +2659,7 @@ window.openNewFincaModal = function() {
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Área Total (Ha) *</label>
-          <input type="number" step="0.5" id="new-finca-area" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" placeholder="100" />
+          <input type="number" min="0.5" step="0.5" id="new-finca-area" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" placeholder="100" />
         </div>
       </div>
       <div>
@@ -2638,6 +2679,7 @@ window.openNewFincaModal = function() {
 
 window.saveNewFincaSubmit = function(event) {
   event.preventDefault();
+  if (!validateForm(event)) return;
   const nombre = document.getElementById('new-finca-nombre').value.trim();
   const ubicacion = document.getElementById('new-finca-ubicacion').value.trim();
   const areaTotal = Number(document.getElementById('new-finca-area').value);
@@ -2671,7 +2713,7 @@ window.openNewLoteModal = function() {
   if (!container) return;
 
   const bodyHTML = `
-    <form onsubmit="window.saveNewLoteSubmit(event)" class="space-y-4">
+    <form novalidate onsubmit="window.saveNewLoteSubmit(event)" class="space-y-4">
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Identificador del Lote *</label>
         <input type="text" id="new-lote-id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" placeholder="ej. Lote E - Cafetal Sur" />
@@ -2683,7 +2725,7 @@ window.openNewLoteModal = function() {
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Área (Ha) *</label>
-          <input type="number" step="0.1" id="new-lote-area" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" placeholder="10" />
+          <input type="number" min="0.1" step="0.1" id="new-lote-area" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" placeholder="10" />
         </div>
       </div>
       <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
@@ -2699,6 +2741,7 @@ window.openNewLoteModal = function() {
 
 window.saveNewLoteSubmit = function(event) {
   event.preventDefault();
+  if (!validateForm(event)) return;
   const identificador = document.getElementById('new-lote-id').value.trim();
   const cultivoNombre = document.getElementById('new-lote-cultivo').value.trim();
   const area = Number(document.getElementById('new-lote-area').value);
@@ -2732,14 +2775,14 @@ window.openProgramarRiegoModal = function(loteNombre) {
   if (!container) return;
 
   const bodyHTML = `
-    <form onsubmit="window.saveProgramarRiegoSubmit(event, '${loteNombre}')" class="space-y-4">
+    <form novalidate onsubmit="window.saveProgramarRiegoSubmit(event, '${loteNombre}')" class="space-y-4">
       <div class="p-3 bg-emerald-50 rounded-xl text-xs text-emerald-800">
         Programando riego de precisión para <strong>${loteNombre}</strong> mediante electrobomba automatizada.
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Duración (minutos) *</label>
-          <input type="number" id="riego-minutos" value="45" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
+          <input type="number" min="1" id="riego-minutos" value="45" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Hora Programada *</label>
@@ -2759,6 +2802,7 @@ window.openProgramarRiegoModal = function(loteNombre) {
 
 window.saveProgramarRiegoSubmit = function(event, loteNombre) {
   event.preventDefault();
+  if (!validateForm(event)) return;
   const minutos = document.getElementById('riego-minutos').value;
   const hora = document.getElementById('riego-hora').value;
 
@@ -2788,11 +2832,11 @@ window.editProduccionModal = function(prodId) {
   if (!prod) return;
 
   const bodyHTML = `
-    <form onsubmit="window.updateProduccionSubmit(event, '${prod.id}')" class="space-y-4">
+    <form novalidate onsubmit="window.updateProduccionSubmit(event, '${prod.id}')" class="space-y-4">
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Cantidad Cosechada (Kg) *</label>
-          <input type="number" step="0.5" id="edit-prod-cant" value="${prod.cantidad}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
+          <input type="number" min="0.5" step="0.5" id="edit-prod-cant" value="${prod.cantidad}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Calidad *</label>
@@ -2826,6 +2870,7 @@ window.editProduccionModal = function(prodId) {
 
 window.updateProduccionSubmit = function(event, prodId) {
   event.preventDefault();
+  if (!validateForm(event)) return;
   const prod = state.produccion.find(p => p.id === prodId);
   if (!prod) return;
 
@@ -2849,7 +2894,7 @@ window.editCultivoModal = function(cultivoId) {
   if (!c) return;
 
   const bodyHTML = `
-    <form onsubmit="window.updateCultivoSubmit(event, '${c.id}')" class="space-y-4">
+    <form novalidate onsubmit="window.updateCultivoSubmit(event, '${c.id}')" class="space-y-4">
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre del Cultivo *</label>
         <input type="text" id="edit-cul-nombre" value="${c.nombre}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
@@ -2861,7 +2906,7 @@ window.editCultivoModal = function(cultivoId) {
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Área Sembrada (Ha) *</label>
-          <input type="number" step="0.1" id="edit-cul-area" value="${c.areaSembrada}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
+          <input type="number" min="0.1" step="0.1" id="edit-cul-area" value="${c.areaSembrada}" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white" />
         </div>
       </div>
       <div class="grid grid-cols-2 gap-3">
@@ -2887,6 +2932,7 @@ window.editCultivoModal = function(cultivoId) {
 
 window.updateCultivoSubmit = function(event, cultivoId) {
   event.preventDefault();
+  if (!validateForm(event)) return;
   const c = state.cultivos.find(item => item.id === cultivoId);
   if (!c) return;
 
