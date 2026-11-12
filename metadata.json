@@ -1,0 +1,6 @@
+{
+  "name": "Sistema Agropecuario SENA - Control de Cultivos",
+  "description": "Aplicación Web Agropecuaria para la gestión y control de terrenos, lotes, cultivos, actividades agrícolas, producción y reportes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

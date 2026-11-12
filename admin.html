@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgroControl SENA - Módulo Administrador</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-emerald-200">
+    <!-- Header Navbar -->
+    <header class="bg-slate-900 text-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-xl text-white">
+              <i data-lucide="shield" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h1 class="font-bold text-base tracking-tight">
+                Módulo de Administración <span class="text-indigo-400 font-semibold">SENA</span>
+              </h1>
+              <p class="text-xs text-slate-400">
+                Gestión de Cuentas, Permisos y Parámetros del Sistema
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <a href="/index.html" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              <span>Volver a App Principal (index.html)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <!-- Restricted Access View -->
+      <div id="admin-restricted" class="hidden bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center max-w-md mx-auto my-12 space-y-4">
+        <div class="inline-flex p-3 bg-rose-100 text-rose-700 rounded-2xl">
+          <i data-lucide="shield-alert" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-900">Acceso Restringido</h2>
+        <p id="restricted-reason" class="text-xs text-slate-600">
+          Debe iniciar sesión como Administrador para acceder a este módulo.
+        </p>
+        <a href="/index.html" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          Ir a Iniciar Sesión en App Principal
+        </a>
+      </div>
+
+      <!-- Allowed Admin Content -->
+      <div id="admin-main-content" class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="users" class="w-6 h-6 text-indigo-600"></i>
+              <h2 class="text-xl font-bold text-slate-900">Gestión de Usuarios y Permisos</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">
+              Administración de cuentas, roles (Administrador, Técnico, Operario) y estado de acceso.
+            </p>
+          </div>
+
+          <button onclick="window.openNewUserModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 self-start sm:self-auto">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            Nuevo Usuario SENA
+          </button>
+        </div>
+
+        <!-- User List Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 uppercase text-[11px]">
+                <tr>
+                  <th class="px-4 py-3 font-semibold">Usuario</th>
+                  <th class="px-4 py-3 font-semibold">Documento</th>
+                  <th class="px-4 py-3 font-semibold">Correo / Teléfono</th>
+                  <th class="px-4 py-3 font-semibold">Rol</th>
+                  <th class="px-4 py-3 font-semibold">Estado</th>
+                  <th class="px-4 py-3 font-semibold text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="user-table-body" class="divide-y divide-slate-100">
+                <!-- Rendered by admin.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-[11px] py-4 px-6 text-center border-t border-slate-800 mt-auto">
+      <p>
+        <strong class="text-slate-300">AgroControl SENA Módulo Admin</strong> — Proyecto Formativo ADSO
+      </p>
+    </footer>
+
+    <!-- JS Logic -->
+    <script type="module" src="/admin.js"></script>
+  </body>
+</html>
