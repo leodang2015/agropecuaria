@@ -19,7 +19,7 @@ const initialFincas = [
     cultivosActivos: 12,
     sensoresActivos: 24,
     estado: 'Saludable',
-    imagen: '/src/assets/images/finca_palmas_landscape_1794490270492.jpg',
+    imagen: '/images/finca_palmas.jpg',
     descripcion: 'Finca insignia tecnificada con sistema de riego automatizado y telemetría IoT en tiempo real.'
   },
   {
@@ -31,7 +31,7 @@ const initialFincas = [
     cultivosActivos: 6,
     sensoresActivos: 18,
     estado: 'Saludable',
-    imagen: '/src/assets/images/finca_paraiso_greenhouse_1794490270642.jpg',
+    imagen: '/images/finca_paraiso.jpg',
     descripcion: 'Predio hortícola con módulos de invernadero tecnificado para tomate chonto y frutales.'
   },
   {
@@ -43,7 +43,7 @@ const initialFincas = [
     cultivosActivos: 8,
     sensoresActivos: 32,
     estado: 'Monitoreo',
-    imagen: '/src/assets/images/finca_aerial_map_1794490269769.jpg',
+    imagen: '/images/finca_aerial_map.jpg',
     descripcion: 'Plantación cafetera tradicional en proceso de certificación de agricultura regenerativa.'
   },
   {
@@ -55,7 +55,7 @@ const initialFincas = [
     cultivosActivos: 4,
     sensoresActivos: 14,
     estado: 'Estado: Alerta',
-    imagen: '/src/assets/images/finca_palmas_landscape_1794490270492.jpg',
+    imagen: '/images/finca_palmas.jpg',
     descripcion: 'Área agroforestal de cacao fino y plátano con déficit hídrico estacional bajo monitoreo.'
   },
   {
@@ -67,10 +67,11 @@ const initialFincas = [
     cultivosActivos: 5,
     sensoresActivos: 20,
     estado: 'Saludable',
-    imagen: '/src/assets/images/finca_paraiso_greenhouse_1794490270642.jpg',
+    imagen: '/images/finca_paraiso.jpg',
     descripcion: 'Predio citricola y aguacate Hass con sistema de fertirriego por microaspersión.'
   }
 ];
+
 
 const initialLotes = [
   {
@@ -292,7 +293,26 @@ class StateManager {
     const savedSession = JSON.parse(localStorage.getItem('agro_session'));
     this.currentUser = savedSession || this.users[0];
 
-    this.fincas = JSON.parse(localStorage.getItem('agro_fincas')) || initialFincas;
+    let savedFincas = [];
+    try {
+      savedFincas = JSON.parse(localStorage.getItem('agro_fincas')) || [];
+    } catch (e) {
+      savedFincas = [];
+    }
+
+    if (!Array.isArray(savedFincas) || savedFincas.length === 0) {
+      this.fincas = [...initialFincas];
+    } else {
+      // Auto-migrate any old paths stored in browser localStorage
+      this.fincas = savedFincas.map(f => {
+        if (!f.imagen || f.imagen.includes('/src/assets/images/')) {
+          if (f.id === 'ter-1' || f.id === 'ter-4') f.imagen = '/images/finca_palmas.jpg';
+          else if (f.id === 'ter-2' || f.id === 'ter-5') f.imagen = '/images/finca_paraiso.jpg';
+          else f.imagen = '/images/finca_aerial_map.jpg';
+        }
+        return f;
+      });
+    }
     this.terrenos = this.fincas; // Backwards compatible alias
     this.lotes = JSON.parse(localStorage.getItem('agro_lotes')) || initialLotes;
     this.cultivos = JSON.parse(localStorage.getItem('agro_cultivos')) || initialCultivos;
@@ -887,8 +907,14 @@ function renderFincasView() {
             return `
               <div class="bg-white rounded-2xl border ${isSelected ? 'border-emerald-600 ring-2 ring-emerald-600/20' : 'border-slate-200/80'} overflow-hidden shadow-2xs flex flex-col justify-between transition-all hover:shadow-md">
                 <!-- Farm Photo / Landscape -->
-                <div class="relative h-40 bg-slate-100 overflow-hidden">
-                  <img src="${f.imagen}" alt="${f.nombre}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                <div class="relative h-40 bg-gradient-to-br from-[#123625] via-[#1a4a34] to-[#0d2a1c] overflow-hidden">
+                  <img
+                    src="${f.imagen}"
+                    alt="${f.nombre}"
+                    loading="lazy"
+                    class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    onerror="this.onerror=null; this.src='/images/finca_palmas.jpg';"
+                  />
                   <span class="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusClass}">
                     ${f.estado}
                   </span>
@@ -1030,13 +1056,16 @@ function renderTerrenosView() {
       <!-- Main Layout: Map Canvas (Left) + Selected Lot Drawer (Right) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Interactive Satellite Drone Map Canvas (Page 4) -->
-        <div class="lg:col-span-2 bg-slate-900 rounded-2xl overflow-hidden relative shadow-md min-h-[440px] flex flex-col justify-between border border-slate-700">
-          <!-- Satellite Aerial Background Image -->
-          <img
-            src="/src/assets/images/finca_aerial_map_1794490269769.jpg"
-            alt="Mapa satelital de lotes de la finca"
-            class="absolute inset-0 w-full h-full object-cover opacity-85"
-          />
+        <div class="lg:col-span-2 bg-[#0D2E20] rounded-2xl overflow-hidden relative shadow-md min-h-[440px] flex flex-col justify-between border border-[#184832]">
+          <!-- Satellite Aerial Background Image with resilient fallback -->
+          <div class="absolute inset-0 bg-gradient-to-br from-[#0e2c1c] via-[#143e29] to-[#0a1e14]">
+            <img
+              src="/images/finca_aerial_map.jpg"
+              alt="Mapa satelital de lotes de la finca"
+              class="w-full h-full object-cover opacity-85"
+              onerror="this.onerror=null; this.src='/images/finca_palmas.jpg';"
+            />
+          </div>
 
           <!-- SVG Interactive Lot Polygons -->
           <svg class="absolute inset-0 w-full h-full cursor-pointer z-10" viewBox="0 0 800 500" preserveAspectRatio="none">
@@ -1955,11 +1984,14 @@ function renderLoginScreen() {
 
       <!-- Right Column: Precision Agriculture Illustration (Page 2) -->
       <div class="relative bg-slate-900 hidden md:block overflow-hidden">
-        <img
-          src="/src/assets/images/login_precision_agri_1794490269568.jpg"
-          alt="Agricultura de precisión e IoT"
-          class="w-full h-full object-cover opacity-90"
-        />
+        <div class="absolute inset-0 bg-gradient-to-br from-[#0e2c1c] via-[#184833] to-[#0a1e14]">
+          <img
+            src="/images/login_precision_agri.jpg"
+            alt="Agricultura de precisión e IoT"
+            class="w-full h-full object-cover opacity-90"
+            onerror="this.onerror=null; this.src='/images/finca_paraiso.jpg';"
+          />
+        </div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 text-white space-y-2">
           <span class="inline-block text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30 w-max">
             Agricultura de Precisión
@@ -2063,7 +2095,7 @@ window.saveNewFincaSubmit = function(event) {
       cultivosActivos: 1,
       sensoresActivos: 4,
       estado: 'Saludable',
-      imagen: '/src/assets/images/finca_palmas_landscape_1794490270492.jpg',
+      imagen: '/images/finca_palmas.jpg',
       descripcion: 'Predio registrado en AgroControl.'
     };
     state.fincas.push(newFinca);
