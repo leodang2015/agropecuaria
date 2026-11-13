@@ -7,6 +7,11 @@ const initialUsers = [
   { id: 'usr-4', nombre: 'Pedro Nel Gómez', documento: '70112233', correo: 'pedro.gomez@sena.edu.co', telefono: '3157788990', rol: 'operario', estado: 'inactivo' }
 ];
 
+function escapeHtml(value) {
+  const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(value ?? '').replace(/[&<>"']/g, character => entities[character]);
+}
+
 function getUsers() {
   const adminUsers = JSON.parse(localStorage.getItem('sena_users')) || initialUsers;
   const appUsers = JSON.parse(localStorage.getItem('agro_users')) || [];
@@ -68,9 +73,9 @@ function renderUsers() {
 
   tbody.innerHTML = users.map(u => `
     <tr class="hover:bg-slate-50 transition-colors">
-      <td class="px-4 py-3 font-bold text-slate-900">${u.nombre}</td>
-      <td class="px-4 py-3 font-mono">${u.documento}</td>
-      <td class="px-4 py-3">${u.correo}<br /><span class="text-slate-400">${u.telefono}</span></td>
+      <td class="px-4 py-3 font-bold text-slate-900">${escapeHtml(u.nombre)}</td>
+      <td class="px-4 py-3 font-mono">${escapeHtml(u.documento)}</td>
+      <td class="px-4 py-3">${escapeHtml(u.correo)}<br /><span class="text-slate-400">${escapeHtml(u.telefono)}</span></td>
       <td class="px-4 py-3">
         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
           u.rol === 'administrador' ? 'bg-purple-100 text-purple-800' :
@@ -85,7 +90,7 @@ function renderUsers() {
         }">${u.estado}</span>
       </td>
       <td class="px-4 py-3 text-right space-x-2">
-        <button type="button" onclick="window.toggleUserStatusAction('${u.id}')" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition-colors" title="${u.estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario'}" aria-label="${u.estado === 'activo' ? 'Desactivar' : 'Activar'} a ${u.nombre}">
+        <button type="button" onclick="window.toggleUserStatusAction('${escapeHtml(u.id)}')" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition-colors" title="${u.estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario'}" aria-label="${u.estado === 'activo' ? 'Desactivar' : 'Activar'} a ${escapeHtml(u.nombre)}">
           <i data-lucide="power" class="w-4 h-4"></i>
         </button>
       </td>

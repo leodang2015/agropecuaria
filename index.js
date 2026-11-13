@@ -1,5 +1,14 @@
 // AgroControl - Sistema Agropecuario y Gestión de Cultivos
 // Basado en los Mockups Oficiales de AgroControl (Omar Dangond, Deyner Herrera, Hervis Castellano, Daniel Vesga)
+import {
+  getAuthErrorMessage,
+  isFirebaseConfigured,
+  loginWithGoogle,
+  loginWithPassword,
+  logoutFromFirebase,
+  registerWithPassword,
+  watchAuthState
+} from './auth.js';
 
 // Initial Data Seeds
 const initialUsers = [
@@ -539,11 +548,9 @@ class StateManager {
     localStorage.setItem('agro_users', JSON.stringify(savedUsers));
     this.users = savedUsers;
 
-    // Default session: Juan Díaz (from mockup page 1 & 7) or saved
-    const savedSession = JSON.parse(localStorage.getItem('agro_session'));
-    this.currentUser = savedSession
-      ? this.users.find(user => user.id === savedSession.id) || savedSession
-      : this.users[0];
+    this.currentUser = null;
+    this.firebaseUserUid = null;
+    localStorage.removeItem('agro_session');
 
     let savedFincas = [];
     try {
@@ -671,8 +678,37 @@ class StateManager {
     return { success: true, user: foundUser };
   }
 
+  setFirebaseUser(firebaseUser) {
+    const email = (firebaseUser.email || '').trim().toLowerCase();
+    let user = this.users.find(existing => existing.firebaseUid === firebaseUser.uid);
+
+    if (!user) {
+      user = {
+        id: firebaseUser.uid,
+        firebaseUid: firebaseUser.uid,
+        nombre: firebaseUser.displayName || email.split('@')[0],
+        documento: '',
+        correo: email,
+        telefono: '',
+        rol: 'cliente',
+        estado: 'activo'
+      };
+      this.users.push(user);
+    }
+
+    user.nombre = firebaseUser.displayName || user.nombre || email.split('@')[0];
+    user.correo = email;
+    this.currentUser = user;
+    this.firebaseUserUid = firebaseUser.uid;
+    this.activeView = 'dashboard';
+    localStorage.setItem('agro_session', JSON.stringify(user));
+    this.save();
+    return user;
+  }
+
   logout() {
     this.currentUser = null;
+    this.firebaseUserUid = null;
     localStorage.removeItem('agro_session');
   }
 }
@@ -893,9 +929,14 @@ window.updateComplaintStatus = function(complaintId, status) {
   window.showToast(status === 'Resuelta' ? 'Queja marcada como resuelta.' : 'Queja tomada para revisión.');
 };
 
-window.handleLogout = function() {
-  state.logout();
-  updateUIState();
+window.handleLogout = async function() {
+  try {
+    if (state.firebaseUserUid) await logoutFromFirebase();
+    state.logout();
+    updateUIState();
+  } catch (error) {
+    window.showToast(getAuthErrorMessage(error));
+  }
 };
 
 window.quickLogin = function(email) {
@@ -948,10 +989,10 @@ function renderHeader() {
         <!-- User Profile Pill -->
         <div class="flex items-center gap-2.5 pl-2 border-l border-slate-200">
           <div class="w-8 h-8 rounded-full bg-[#1B794B] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-            ${initials}
+            ${escapeHtml(initials)}
           </div>
           <div class="hidden sm:block text-left">
-            <p class="text-xs font-bold text-slate-900 leading-tight">${state.currentUser.nombre}</p>
+            <p class="text-xs font-bold text-slate-900 leading-tight">${escapeHtml(state.currentUser.nombre)}</p>
             <p class="text-[10px] text-slate-500 capitalize">${state.currentUser.rol}</p>
           </div>
           <button onclick="window.handleLogout()" title="Cerrar Sesión" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors ml-1">
@@ -1396,7 +1437,7 @@ function renderClientDashboardView() {
       <header class="bg-white rounded-2xl p-5 sm:p-7 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Portal del cliente</p>
-          <h1 class="text-2xl font-bold text-slate-900 mt-1">Hola, ${state.currentUser.nombre}</h1>
+          <h1 class="text-2xl font-bold text-slate-900 mt-1">Hola, ${escapeHtml(state.currentUser.nombre)}</h1>
           <p class="text-sm text-slate-600 mt-1">${finca.nombre} · ${finca.ubicacion}</p>
         </div>
         <button onclick="window.openComplaintModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl">
@@ -1480,7 +1521,7 @@ function renderTechnicianDashboardView() {
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-t border-slate-100">
             <div>
               <p class="text-xs font-semibold text-slate-900">${complaint.asunto}</p>
-              <p class="text-[11px] text-slate-500">${complaint.cliente} · ${complaint.fincaNombre || state.fincas.find(f => f.id === complaint.fincaId)?.nombre || 'Finca'}</p>
+              <p class="text-[11px] text-slate-500">${escapeHtml(complaint.cliente)} · ${complaint.fincaNombre || state.fincas.find(f => f.id === complaint.fincaId)?.nombre || 'Finca'}</p>
             </div>
             <span class="text-[10px] font-bold text-slate-600">${complaint.estado}</span>
           </div>
@@ -1514,7 +1555,7 @@ function renderQuejasView() {
                   <span class="rounded-full px-2 py-1 text-[10px] font-bold ${complaint.estado === 'Resuelta' ? 'bg-emerald-100 text-emerald-800' : complaint.estado === 'En revisión' ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800'}">${complaint.estado}</span>
                 </div>
                 <p class="text-xs text-slate-600 mt-2">${complaint.descripcion}</p>
-                <p class="text-[11px] text-slate-500 mt-3">${complaint.cliente} · ${state.fincas.find(f => f.id === complaint.fincaId)?.nombre || 'Finca'} · ${complaint.fecha}</p>
+                <p class="text-[11px] text-slate-500 mt-3">${escapeHtml(complaint.cliente)} · ${state.fincas.find(f => f.id === complaint.fincaId)?.nombre || 'Finca'} · ${complaint.fecha}</p>
               </div>
               ${!isClient && complaint.estado !== 'Resuelta' ? `
                 <div class="flex gap-2 shrink-0">
@@ -2684,9 +2725,9 @@ function renderUsuariosView() {
           <tbody class="divide-y divide-slate-100">
             ${state.users.map(u => `
               <tr class="hover:bg-slate-50/70 transition-colors">
-                <td class="p-3.5 font-bold text-slate-900">${u.nombre}</td>
-                <td class="p-3.5 text-slate-600 font-mono">${u.correo}</td>
-                <td class="p-3.5 font-mono text-slate-500">${u.documento}</td>
+                <td class="p-3.5 font-bold text-slate-900">${escapeHtml(u.nombre)}</td>
+                <td class="p-3.5 text-slate-600 font-mono">${escapeHtml(u.correo)}</td>
+                <td class="p-3.5 font-mono text-slate-500">${escapeHtml(u.documento)}</td>
                 <td class="p-3.5">
                   <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${u.rol === 'agronomo' ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-700'}">
                     ${u.rol}
@@ -2699,7 +2740,7 @@ function renderUsuariosView() {
                   </span>
                 </td>
                 <td class="p-3.5 text-right">
-                  <button onclick="window.quickLogin('${u.correo}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold">
+                  <button onclick="window.quickLogin(this.dataset.email)" data-email="${escapeHtml(u.correo)}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold">
                     Iniciar como
                   </button>
                 </td>
@@ -2836,9 +2877,10 @@ function renderConfiguracionView() {
 // ----------------------------------------------------
 // LOGIN SCREEN (Mockup Page 2)
 // ----------------------------------------------------
-function renderLoginScreen() {
+function renderLoginScreen(mode = 'login') {
   const container = document.getElementById('login-container');
   if (!container) return;
+  const isRegistration = mode === 'register';
 
   container.innerHTML = `
     <div class="w-full max-w-4xl bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[520px]">
@@ -2854,78 +2896,95 @@ function renderLoginScreen() {
           </div>
 
           <div class="space-y-1">
-            <h2 class="text-2xl font-bold tracking-tight text-slate-900">Bienvenido a AgroControl</h2>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900">${isRegistration ? 'Crea tu cuenta' : 'Bienvenido a AgroControl'}</h2>
             <p class="text-xs text-slate-500 leading-relaxed">
-              Gestiona tus cultivos y toma mejores decisiones basadas en datos.
+                ${isRegistration ? 'Crea una cuenta con correo y contraseña o continúa con Google.' : 'Inicia sesión con tu correo y contraseña o continúa con Google.'}
             </p>
           </div>
         </div>
 
-        <form novalidate onsubmit="window.handleLoginFormSubmit(event)" class="space-y-4">
+        <form novalidate onsubmit="window.${isRegistration ? 'handleRegistrationFormSubmit' : 'handleLoginFormSubmit'}(event)" class="space-y-4">
+          ${isRegistration ? `
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico</label>
+            <label for="register-name" class="block text-xs font-semibold text-slate-700 mb-1">Nombre completo</label>
+            <div class="relative">
+              <i data-lucide="user-round" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+              <input type="text" id="register-name" autocomplete="name" required class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all" placeholder="Tu nombre" />
+            </div>
+          </div>
+          ` : ''}
+          <div>
+            <label for="${isRegistration ? 'register-email' : 'login-email'}" class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico</label>
             <div class="relative">
               <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
               <input
-                type="text"
-                id="login-email"
-                value="juan.diaz@agrocontrol.io"
+                type="email"
+                id="${isRegistration ? 'register-email' : 'login-email'}"
+                autocomplete="email"
                 required
                 class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
-                placeholder="nombre@agrocontrol.io"
+                placeholder="tunombre@gmail.com"
               />
             </div>
           </div>
 
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-semibold text-slate-700">Contraseña</label>
-              <button type="button" onclick="window.showLoginMessage('La recuperación de contraseña estará disponible próximamente.')" class="text-[11px] text-emerald-700 hover:underline">
+              <label for="${isRegistration ? 'register-password' : 'login-pass'}" class="block text-xs font-semibold text-slate-700">Contraseña</label>
+              ${isRegistration ? '' : `<button type="button" onclick="window.showLoginMessage('La recuperación de contraseña estará disponible próximamente.')" class="text-[11px] text-emerald-700 hover:underline">
                 ¿Olvidaste tu contraseña?
-              </button>
+              </button>`}
             </div>
             <div class="relative">
               <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
               <input
                 type="password"
-                id="login-pass"
-                value="123456"
+                id="${isRegistration ? 'register-password' : 'login-pass'}"
+                autocomplete="${isRegistration ? 'new-password' : 'current-password'}"
+                minlength="6"
                 required
                 class="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
-                placeholder="••••••••"
+                placeholder="Mínimo 6 caracteres"
               />
             </div>
           </div>
 
-          <div class="flex items-center">
-            <input type="checkbox" id="recordar-check" checked class="rounded border-slate-300 text-[#1B794B] focus:ring-emerald-500 w-3.5 h-3.5" />
-            <label for="recordar-check" class="ml-2 text-xs text-slate-600 select-none">Recordarme</label>
-          </div>
-
           <button type="submit" class="w-full py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white font-bold text-xs rounded-xl shadow-xs transition-all">
-            Iniciar sesión
+            ${isRegistration ? 'Crear cuenta' : 'Iniciar sesión'}
           </button>
           <p id="login-feedback" class="hidden text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2" role="status" aria-live="polite"></p>
 
-          <!-- Quick Presets for Evaluation -->
+          <div class="relative flex items-center py-1">
+            <div class="grow border-t border-slate-200"></div>
+            <span class="px-3 text-[11px] text-slate-400">o</span>
+            <div class="grow border-t border-slate-200"></div>
+          </div>
+          <button type="button" onclick="window.handleGoogleSignIn()" class="w-full py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl border border-slate-300 transition-all flex items-center justify-center gap-2">
+            <svg aria-hidden="true" viewBox="0 0 48 48" class="w-4 h-4"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.75 7.18l7.7 5.98c4.5-4.16 7.09-10.3 7.09-17.63z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.82l-7.7-5.98c-2.14 1.44-4.89 2.3-8.2 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continuar con Google
+          </button>
+
+          ${isFirebaseConfigured || isRegistration ? '' : `
           <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
-            <span>Acceso rápido:</span>
+            <span>Modo demostración local:</span>
             <div class="flex flex-wrap gap-x-1.5 gap-y-1">
-              <button type="button" onclick="window.quickLogin('juan.diaz@agrocontrol.io')" class="font-bold text-emerald-700 hover:underline">Juan (Agrónomo)</button>
+              <button type="button" onclick="window.quickLogin('juan.diaz@agrocontrol.io')" class="font-bold text-emerald-700 hover:underline">Juan</button>
               <span>·</span>
-              <button type="button" onclick="window.quickLogin('carlos.restrepo@sena.edu.co')" class="font-bold text-emerald-700 hover:underline">Carlos (Admin)</button>
+              <button type="button" onclick="window.quickLogin('carlos.restrepo@sena.edu.co')" class="font-bold text-emerald-700 hover:underline">Carlos</button>
               <span>·</span>
               <button type="button" onclick="window.quickLogin('juan.perez@agrocontrol.io')" class="font-bold text-indigo-700 hover:underline">Técnico</button>
               <span>·</span>
               <button type="button" onclick="window.quickLogin('cliente.paraiso@finca.com')" class="font-bold text-amber-700 hover:underline">Cliente</button>
             </div>
+            <span class="w-full">Configura Firebase para habilitar cuentas reales.</span>
           </div>
+          `}
         </form>
 
         <div class="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
-          <span>¿Aún no tienes cuenta?</span>
-          <button type="button" onclick="window.showLoginMessage('El registro de nuevos usuarios estará disponible próximamente.')" class="font-bold text-emerald-700 hover:underline ml-1">
-            Regístrate aquí.
+          <span>${isRegistration ? '¿Ya tienes cuenta?' : '¿Aún no tienes cuenta?'}</span>
+          <button type="button" onclick="window.${isRegistration ? 'showLoginForm' : 'showRegistrationForm'}()" class="font-bold text-emerald-700 hover:underline ml-1">
+            ${isRegistration ? 'Inicia sesión.' : 'Regístrate aquí.'}
           </button>
         </div>
       </div>
@@ -2956,27 +3015,72 @@ function renderLoginScreen() {
   if (window.lucide) window.lucide.createIcons();
 }
 
+window.showRegistrationForm = function() {
+  renderLoginScreen('register');
+};
+
+window.showLoginForm = function() {
+  renderLoginScreen('login');
+};
+
 window.handleLoginFormSubmit = function(event) {
+  return window.handleAccountFormSubmit(event);
+};
+
+window.handleAccountFormSubmit = async function(event) {
   event.preventDefault();
   if (!validateForm(event)) return;
-  const emailInput = document.getElementById('login-email');
-  if (emailInput) {
-    const res = state.login(emailInput.value);
-    if (res.success) {
-      updateUIState();
-    } else {
-      window.showLoginMessage(res.message);
-    }
+
+  const isRegistration = event.currentTarget.querySelector('#register-email') !== null;
+  const email = document.getElementById(isRegistration ? 'register-email' : 'login-email')?.value.trim();
+  const password = document.getElementById(isRegistration ? 'register-password' : 'login-pass')?.value;
+  const name = document.getElementById('register-name')?.value.trim();
+  const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+  if (!email || !password || (isRegistration && !name)) return;
+
+  submitButton.disabled = true;
+  try {
+    const firebaseUser = isRegistration
+      ? await registerWithPassword(name, email, password)
+      : await loginWithPassword(email, password);
+    state.setFirebaseUser(firebaseUser);
+    updateUIState();
+  } catch (error) {
+    window.showLoginMessage(getAuthErrorMessage(error));
+  } finally {
+    submitButton.disabled = false;
   }
 };
 
-window.showLoginMessage = function(message) {
+window.handleGoogleSignIn = async function() {
+  try {
+    const firebaseUser = await loginWithGoogle();
+    state.setFirebaseUser(firebaseUser);
+    updateUIState();
+  } catch (error) {
+    window.showLoginMessage(getAuthErrorMessage(error));
+  }
+};
+
+window.handleRegistrationFormSubmit = function(event) {
+  return window.handleAccountFormSubmit(event);
+};
+
+window.showLoginMessage = function(message, isError = true) {
   const feedback = document.getElementById('login-feedback');
   if (feedback) {
     feedback.textContent = message;
+    feedback.className = isError
+      ? 'text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2'
+      : 'text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2';
     feedback.classList.remove('hidden');
   }
 };
+
+function escapeHtml(value) {
+  const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(value ?? '').replace(/[&<>"']/g, character => entities[character]);
+}
 
 // ----------------------------------------------------
 // MODALS & ACTIONS (Cultivo Edit, Producción Edit, etc.)
@@ -3183,7 +3287,7 @@ window.openNewFincaModal = function() {
       </div>
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Responsable / Administrador *</label>
-        <input type="text" id="new-finca-resp" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" value="${state.currentUser ? state.currentUser.nombre : ''}" />
+        <input type="text" id="new-finca-resp" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600" value="${escapeHtml(state.currentUser ? state.currentUser.nombre : '')}" />
       </div>
       <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
         <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
@@ -3880,4 +3984,23 @@ window.resolverAlerta = function(alertaId) {
 // Init Application
 document.addEventListener('DOMContentLoaded', () => {
   updateUIState();
+  if (!isFirebaseConfigured) return;
+
+  try {
+    watchAuthState(firebaseUser => {
+      if (firebaseUser) {
+        state.setFirebaseUser(firebaseUser);
+        updateUIState();
+      } else if (state.firebaseUserUid) {
+        state.logout();
+        updateUIState();
+      }
+    }, error => {
+      console.error('Firebase authentication state error:', error);
+      window.showLoginMessage(getAuthErrorMessage(error));
+    });
+  } catch (error) {
+    console.error('Firebase authentication initialization error:', error);
+    window.showLoginMessage(getAuthErrorMessage(error));
+  }
 });
