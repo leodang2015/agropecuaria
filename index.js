@@ -4,8 +4,10 @@ import {
   getAuthErrorMessage,
   isFirebaseConfigured,
   loginWithGoogle,
+  loginLocally,
   loginWithPassword,
   logoutFromFirebase,
+  registerLocally,
   registerWithPassword,
   watchAuthState
 } from './auth.js';
@@ -692,15 +694,16 @@ class StateManager {
     return { success: true, user: foundUser };
   }
 
-  setFirebaseUser(firebaseUser) {
-    const email = (firebaseUser.email || '').trim().toLowerCase();
-    let user = this.users.find(existing => existing.firebaseUid === firebaseUser.uid);
+  setAuthenticatedUser(authUser, provider) {
+    const email = (authUser.email || '').trim().toLowerCase();
+    let user = this.users.find(existing => existing.authUid === authUser.uid);
 
     if (!user) {
       user = {
-        id: firebaseUser.uid,
-        firebaseUid: firebaseUser.uid,
-        nombre: firebaseUser.displayName || email.split('@')[0],
+        id: authUser.uid,
+        authUid: authUser.uid,
+        authProvider: provider,
+        nombre: authUser.displayName || email.split('@')[0],
         documento: '',
         correo: email,
         telefono: '',
@@ -710,10 +713,11 @@ class StateManager {
       this.users.push(user);
     }
 
-    user.nombre = firebaseUser.displayName || user.nombre || email.split('@')[0];
+    user.authProvider = provider;
+    user.nombre = authUser.displayName || user.nombre || email.split('@')[0];
     user.correo = email;
     this.currentUser = user;
-    this.firebaseUserUid = firebaseUser.uid;
+    this.firebaseUserUid = provider === 'firebase' ? authUser.uid : null;
     this.activeView = 'dashboard';
     if (user.rol === 'cliente') {
       const fincaIds = getClientFincaIds(user);
@@ -3051,7 +3055,7 @@ function renderLoginScreen(mode = 'login') {
           <div class="space-y-1">
             <h2 class="text-2xl font-bold tracking-tight text-slate-900">${isRegistration ? 'Crea tu cuenta' : 'Bienvenido a AgroControl'}</h2>
             <p class="text-xs text-slate-500 leading-relaxed">
-                ${isRegistration ? 'Crea una cuenta con correo y contraseña o continúa con Google.' : 'Inicia sesión con tu correo y contraseña o continúa con Google.'}
+                ${isRegistration ? 'No necesitas Gmail: usa cualquier correo válido y crea una contraseña.' : 'Accede con cualquier correo registrado y tu contraseña, o continúa con Google.'}
             </p>
           </div>
         </div>
@@ -3067,7 +3071,7 @@ function renderLoginScreen(mode = 'login') {
           </div>
           ` : ''}
           <div>
-            <label for="${isRegistration ? 'register-email' : 'login-email'}" class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico</label>
+            <label for="${isRegistration ? 'register-email' : 'login-email'}" class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico${isRegistration ? ' (no necesitas Gmail)' : ''}</label>
             <div class="relative">
               <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
               <input
@@ -3076,7 +3080,7 @@ function renderLoginScreen(mode = 'login') {
                 autocomplete="email"
                 required
                 class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
-                placeholder="tunombre@gmail.com"
+                placeholder="nombre@correo.com"
               />
             </div>
           </div>
@@ -3117,9 +3121,9 @@ function renderLoginScreen(mode = 'login') {
             Continuar con Google
           </button>
 
-          ${isFirebaseConfigured || isRegistration ? '' : `
+          ${isFirebaseConfigured ? '' : `
           <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
-            <span>Modo demostración local:</span>
+            <span>Cuenta local en este navegador:</span>
             <div class="flex flex-wrap gap-x-1.5 gap-y-1">
               <button type="button" onclick="window.quickLogin('juan.diaz@agrocontrol.io')" class="font-bold text-emerald-700 hover:underline">Juan</button>
               <span>·</span>
@@ -3129,7 +3133,7 @@ function renderLoginScreen(mode = 'login') {
               <span>·</span>
               <button type="button" onclick="window.quickLogin('cliente.paraiso@finca.com')" class="font-bold text-amber-700 hover:underline">Cliente</button>
             </div>
-            <span class="w-full">Configura Firebase para habilitar cuentas reales.</span>
+            <span class="w-full">Google requiere Firebase; no hace falta Gmail para registrarse con contraseña.</span>
           </div>
           `}
         </form>
@@ -3193,10 +3197,14 @@ window.handleAccountFormSubmit = async function(event) {
 
   submitButton.disabled = true;
   try {
-    const firebaseUser = isRegistration
-      ? await registerWithPassword(name, email, password)
-      : await loginWithPassword(email, password);
-    state.setFirebaseUser(firebaseUser);
+    const authenticatedUser = isFirebaseConfigured
+      ? isRegistration
+        ? await registerWithPassword(name, email, password)
+        : await loginWithPassword(email, password)
+      : isRegistration
+        ? await registerLocally(name, email, password)
+        : await loginLocally(email, password);
+    state.setAuthenticatedUser(authenticatedUser, isFirebaseConfigured ? 'firebase' : 'local');
     updateUIState();
   } catch (error) {
     window.showLoginMessage(getAuthErrorMessage(error));
@@ -3208,7 +3216,7 @@ window.handleAccountFormSubmit = async function(event) {
 window.handleGoogleSignIn = async function() {
   try {
     const firebaseUser = await loginWithGoogle();
-    state.setFirebaseUser(firebaseUser);
+    state.setAuthenticatedUser(firebaseUser, 'firebase');
     updateUIState();
   } catch (error) {
     window.showLoginMessage(getAuthErrorMessage(error));
@@ -4164,7 +4172,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     watchAuthState(firebaseUser => {
       if (firebaseUser) {
-        state.setFirebaseUser(firebaseUser);
+        state.setAuthenticatedUser(firebaseUser, 'firebase');
         updateUIState();
       } else if (state.firebaseUserUid) {
         state.logout();
