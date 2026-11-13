@@ -1050,7 +1050,7 @@ window.submitComplaint = function(event) {
   window.closeModal();
   renderCurrentView();
   initNavigation();
-  window.showToast('Solicitud enviada correctamente.');
+  window.showToast('Solicitud creada correctamente.');
 };
 
 window.updateComplaintStatus = function(complaintId, status) {
