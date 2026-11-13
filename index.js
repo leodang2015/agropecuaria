@@ -21,6 +21,12 @@ const initialUsers = [
   { id: 'usr-cliente-2', nombre: 'Cliente San José', documento: '9000000002', correo: 'cliente.sanjose@finca.com', telefono: '3157788990', rol: 'cliente', fincaId: 'ter-4', estado: 'activo' }
 ];
 
+function getClientFincaIds(user) {
+  if (!user || user.rol !== 'cliente') return [];
+  const fincaIds = Array.isArray(user.fincaIds) ? user.fincaIds : [];
+  return [...new Set([...fincaIds, user.fincaId].filter(Boolean))];
+}
+
 const initialFincas = [
   {
     id: 'ter-1',
@@ -592,9 +598,11 @@ class StateManager {
     this.quejas = JSON.parse(localStorage.getItem('agro_quejas')) || initialQuejas;
     this.bitacoraAudit = JSON.parse(localStorage.getItem('agro_audit')) || [];
 
-    this.selectedFincaId = this.currentUser?.rol === 'cliente' && this.currentUser.fincaId
-      ? this.currentUser.fincaId
-      : localStorage.getItem('agro_selected_finca') || 'ter-1';
+    const savedSelectedFincaId = localStorage.getItem('agro_selected_finca');
+    const clientFincaIds = getClientFincaIds(this.currentUser);
+    this.selectedFincaId = this.currentRole === 'cliente'
+      ? (clientFincaIds.includes(savedSelectedFincaId) ? savedSelectedFincaId : clientFincaIds[0])
+      : savedSelectedFincaId || 'ter-1';
     const fincaLotes = this.getLotesForFinca(this.selectedFincaId);
     this.selectedLoteId = (fincaLotes[0] && fincaLotes[0].id) || 'lot-p1';
     this.selectedCultivoId = 'cul-tomate';
@@ -611,6 +619,11 @@ class StateManager {
   }
 
   get activeFinca() {
+    if (this.currentRole === 'cliente') {
+      const fincaIds = getClientFincaIds(this.currentUser);
+      return this.fincas.find(f => f.id === this.selectedFincaId && fincaIds.includes(f.id))
+        || this.fincas.find(f => fincaIds.includes(f.id));
+    }
     return this.fincas.find(f => f.id === this.selectedFincaId) || this.fincas[0];
   }
 
@@ -667,9 +680,10 @@ class StateManager {
     this.activeView = 'dashboard';
     this.loteEstadoFilter = '';
     this.loteCultivoFilter = '';
-    if (foundUser.rol === 'cliente' && foundUser.fincaId) {
-      this.selectedFincaId = foundUser.fincaId;
-      const fincaLotes = this.getLotesForFinca(foundUser.fincaId);
+    if (foundUser.rol === 'cliente') {
+      const fincaIds = getClientFincaIds(foundUser);
+      if (!fincaIds.includes(this.selectedFincaId)) this.selectedFincaId = fincaIds[0];
+      const fincaLotes = this.getLotesForFinca(this.selectedFincaId);
       this.selectedLoteId = fincaLotes[0]?.id || '';
     }
     localStorage.setItem('agro_session', JSON.stringify(foundUser));
@@ -701,6 +715,11 @@ class StateManager {
     this.currentUser = user;
     this.firebaseUserUid = firebaseUser.uid;
     this.activeView = 'dashboard';
+    if (user.rol === 'cliente') {
+      const fincaIds = getClientFincaIds(user);
+      if (!fincaIds.includes(this.selectedFincaId)) this.selectedFincaId = fincaIds[0] || '';
+      this.selectedLoteId = this.getLotesForFinca(this.selectedFincaId)[0]?.id || '';
+    }
     localStorage.setItem('agro_session', JSON.stringify(user));
     this.save();
     return user;
@@ -731,16 +750,32 @@ function getRecordFincaId(record) {
 
 function getVisibleRecords(records) {
   if (state.currentRole !== 'cliente') return records;
-  return getRecordsForFinca(records, state.currentUser.fincaId);
+  return getRecordsForFinca(records, canClientAccessFinca(state.selectedFincaId) ? state.selectedFincaId : '');
 }
 
 function getRecordsForFinca(records, fincaId) {
+  if (!fincaId) return [];
   return records.filter(record => getRecordFincaId(record) === fincaId);
+}
+
+function getFarmCropNames(fincaId) {
+  return [...new Set(getRecordsForFinca(state.cultivos, fincaId)
+    .map(cultivo => String(cultivo.nombre || '').trim())
+    .filter(Boolean))];
+}
+
+function getFarmMainProduct(finca) {
+  const cropNames = getFarmCropNames(finca.id);
+  return cropNames.includes(finca.productoPrincipal) ? finca.productoPrincipal : '';
+}
+
+function canClientAccessFinca(fincaId) {
+  return state.currentRole !== 'cliente' || getClientFincaIds(state.currentUser).includes(fincaId);
 }
 
 function getVisibleFincas() {
   return state.currentRole === 'cliente'
-    ? state.fincas.filter(finca => finca.id === state.currentUser.fincaId)
+    ? state.fincas.filter(finca => getClientFincaIds(state.currentUser).includes(finca.id))
     : state.fincas;
 }
 
@@ -785,7 +820,7 @@ function validateForm(event) {
 
 // Global Window Helpers & Interactions
 window.handleFincaChange = function(fincaId) {
-  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
+  if (!canClientAccessFinca(fincaId)) return;
   state.selectedFincaId = fincaId;
   state.loteEstadoFilter = '';
   state.loteCultivoFilter = '';
@@ -815,7 +850,7 @@ window.openGlobalSearchResult = function(type, id) {
     window.switchView('fincas');
   } else if (type === 'lote') {
     const lote = state.lotes.find(item => item.id === id);
-    if (!lote || (state.currentRole === 'cliente' && lote.terrenoId !== state.currentUser.fincaId)) return;
+    if (!lote || !canClientAccessFinca(lote.terrenoId)) return;
     state.selectedFincaId = lote.terrenoId;
     state.selectedLoteId = lote.id;
     state.save();
@@ -855,8 +890,8 @@ function renderGlobalSearchResults() {
       <button type="button" onclick="window.openGlobalSearchResult('${item.type}', '${item.id}')" class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-emerald-50">
         <i data-lucide="${item.icon}" class="w-4 h-4 text-emerald-700 shrink-0"></i>
         <span class="min-w-0">
-          <span class="block text-xs font-semibold text-slate-800 truncate">${item.label}</span>
-          <span class="block text-[10px] text-slate-500 truncate">${item.detail}</span>
+          <span class="block text-xs font-semibold text-slate-800 truncate">${escapeHtml(item.label)}</span>
+          <span class="block text-[10px] text-slate-500 truncate">${escapeHtml(item.detail)}</span>
         </span>
       </button>
     `).join('')
@@ -942,21 +977,27 @@ window.openComplaintModal = function() {
 
 window.openClientProductModal = function() {
   if (state.currentRole !== 'cliente') return;
-  const finca = state.fincas.find(item => item.id === state.currentUser.fincaId);
+  const finca = state.activeFinca;
   if (!finca) {
     window.showToast('No se encontró la finca asociada a tu cuenta.');
     return;
   }
+  const cropNames = getFarmCropNames(finca.id);
+  const currentProduct = getFarmMainProduct(finca);
   const bodyHTML = `
     <form novalidate onsubmit="window.saveClientProductSubmit(event)" class="space-y-4">
       ${renderFarmNameField('client-product-finca', finca.nombre)}
       <div>
         <label for="client-product-name" class="block text-xs font-semibold text-slate-700 mb-1">Producto principal *</label>
-        <input id="client-product-name" name="producto" value="${escapeHtml(finca.productoPrincipal || '')}" required maxlength="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="Ej. Café, cacao o aguacate" />
+        <select id="client-product-name" name="producto" required ${cropNames.length ? '' : 'disabled'} class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          <option value="">${cropNames.length ? 'Selecciona un cultivo' : 'No hay cultivos registrados en esta finca'}</option>
+          ${cropNames.map(cropName => `<option value="${escapeHtml(cropName)}" ${cropName === currentProduct ? 'selected' : ''}>${escapeHtml(cropName)}</option>`).join('')}
+        </select>
+        ${cropNames.length ? '' : '<p class="text-[11px] text-amber-700 mt-1" role="status">Primero deben registrar cultivos en esta finca.</p>'}
       </div>
       <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
         <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
-        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Guardar producto</button>
+        <button type="submit" ${cropNames.length ? '' : 'disabled'} class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">Guardar producto</button>
       </div>
     </form>
   `;
@@ -965,13 +1006,19 @@ window.openClientProductModal = function() {
 
 window.saveClientProductSubmit = function(event) {
   event.preventDefault();
-  if (state.currentRole !== 'cliente' || !validateForm(event)) return;
-  const finca = state.fincas.find(item => item.id === state.currentUser.fincaId);
+  if (state.currentRole !== 'cliente') return;
+  const finca = state.fincas.find(item => item.id === state.selectedFincaId && canClientAccessFinca(item.id));
   if (!finca) {
     window.showToast('No se encontró la finca asociada a tu cuenta.');
     return;
   }
-  finca.productoPrincipal = event.currentTarget.elements.producto.value.trim();
+  const product = event.currentTarget.elements.producto.value;
+  if (!getFarmCropNames(finca.id).includes(product)) {
+    window.showToast('Selecciona un cultivo registrado en esta finca.');
+    return;
+  }
+  if (!validateForm(event)) return;
+  finca.productoPrincipal = product;
   state.save();
   window.closeModal();
   renderCurrentView();
@@ -1040,11 +1087,11 @@ function renderHeader() {
 
   if (fincaSelect) {
     const availableFincas = state.currentRole === 'cliente'
-      ? state.fincas.filter(f => f.id === state.currentUser.fincaId)
+      ? getVisibleFincas()
       : state.fincas;
     fincaSelect.innerHTML = availableFincas.map(f => `
       <option value="${f.id}" ${f.id === state.selectedFincaId ? 'selected' : ''}>
-        ${f.nombre}
+        ${escapeHtml(f.nombre)}
       </option>
     `).join('');
     fincaSelect.value = state.selectedFincaId;
@@ -1525,20 +1572,26 @@ function renderEngineerDashboardView() {
 
 function renderClientDashboardView() {
   const finca = state.activeFinca;
+  if (!finca) {
+    return `
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Portal del cliente</p>
+        <h1 class="text-2xl font-bold text-slate-900 mt-1">Hola, ${escapeHtml(state.currentUser.nombre)}</h1>
+        <p class="text-sm text-slate-600 mt-2">Aún no tienes fincas asociadas. Ve a “Mi finca” en el menú lateral para agregar una.</p>
+      </section>
+    `;
+  }
   const lots = state.getLotesForFinca(finca.id);
   const cultivoCount = getRecordsForFinca(state.cultivos, finca.id).length;
   const myComplaints = state.quejas.filter(complaint => complaint.clienteId === state.currentUser.id);
   return `
     <div class="space-y-5">
-      <header class="bg-white rounded-2xl p-5 sm:p-7 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <header class="bg-white rounded-2xl p-5 sm:p-7 border border-slate-200 shadow-sm">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Portal del cliente</p>
           <h1 class="text-2xl font-bold text-slate-900 mt-1">Hola, ${escapeHtml(state.currentUser.nombre)}</h1>
-          <p class="text-sm text-slate-600 mt-1">${finca.nombre} · ${finca.ubicacion}</p>
+          <p class="text-sm text-slate-600 mt-1">${escapeHtml(finca.nombre)} · ${escapeHtml(finca.ubicacion)}</p>
         </div>
-        <button onclick="window.openComplaintModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl">
-          <i data-lucide="message-square-plus" class="w-4 h-4"></i> Crear solicitud
-        </button>
       </header>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         ${[
@@ -1557,7 +1610,7 @@ function renderClientDashboardView() {
       <section class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p class="text-xs font-semibold text-slate-500">Producto principal de la finca</p>
-          <p class="text-lg font-bold text-slate-900 mt-1">${escapeHtml(finca.productoPrincipal || 'Aún no indicado')}</p>
+          <p class="text-lg font-bold text-slate-900 mt-1">${escapeHtml(getFarmMainProduct(finca) || 'Aún no indicado')}</p>
         </div>
         <button onclick="window.openClientProductModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-xl">
           <i data-lucide="sprout" class="w-4 h-4"></i> Indicar producto
@@ -1691,11 +1744,14 @@ function renderFincasView() {
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-slate-900">Mis Fincas</h1>
           <p class="text-xs text-slate-500 mt-0.5">
-            ${isClient ? 'Consulta la información de tu finca.' : 'Administra y consulta la información general de tus fincas.'}
+            ${isClient ? 'Consulta y administra la información de tus fincas.' : 'Administra y consulta la información general de tus fincas.'}
           </p>
         </div>
 
-        ${state.currentRole === 'cliente' ? '' : `<button onclick="window.openNewFincaModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+        ${state.currentRole === 'cliente' ? `<button onclick="window.openNewFincaModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+          <i data-lucide="house-plus" class="w-4 h-4"></i>
+          <span>Agregar finca</span>
+        </button>` : `<button onclick="window.openNewFincaModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>Registrar nueva finca</span>
         </button>`}
@@ -1703,7 +1759,7 @@ function renderFincasView() {
 
       <!-- Filters & View Switcher Bar (Page 3) -->
       <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
-        ${isClient ? `<span class="text-xs font-semibold text-emerald-700">${fincas[0]?.nombre || 'Finca asignada'}</span>` : `<div class="flex flex-wrap items-center gap-2">
+        ${isClient ? `<span class="text-xs font-semibold text-emerald-700">${fincas.length} ${fincas.length === 1 ? 'finca registrada' : 'fincas registradas'}</span>` : `<div class="flex flex-wrap items-center gap-2">
           <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
             <option>Ubicación (Todas)</option>
             <option>Valle del Cauca</option>
@@ -1758,7 +1814,7 @@ function renderFincasView() {
                 <div class="relative h-40 bg-gradient-to-br from-[#123625] via-[#1a4a34] to-[#0d2a1c] overflow-hidden">
                   <img
                     src="${f.imagen}"
-                    alt="${f.nombre}"
+                    alt="${escapeHtml(f.nombre)}"
                     loading="lazy"
                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                     onerror="this.onerror=null; this.src='/images/finca_palmas.jpg';"
@@ -1776,18 +1832,18 @@ function renderFincasView() {
                 <!-- Farm Details -->
                 <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 class="font-bold text-slate-900 text-sm">${f.nombre}</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">${f.ubicacion}</p>
+                    <h3 class="font-bold text-slate-900 text-sm">${escapeHtml(f.nombre)}</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">${escapeHtml(f.ubicacion)}</p>
                     <p class="text-xs font-medium text-slate-700 mt-2">Área: <strong>${f.areaTotal} hectáreas</strong></p>
                     <p class="text-[11px] text-slate-500 mt-0.5">${isClient ? getRecordsForFinca(state.cultivos, f.id).length : f.cultivosActivos} cultivos activos · ${isClient ? getRecordsForFinca(state.sensores, f.id).length : f.sensoresActivos} sensores</p>
-                    <p class="text-[11px] text-slate-500 mt-1">Producto principal: <strong class="text-slate-700">${escapeHtml(f.productoPrincipal || 'No indicado')}</strong></p>
+                    <p class="text-[11px] text-slate-500 mt-1">Producto principal: <strong class="text-slate-700">${escapeHtml(getFarmMainProduct(f) || 'No indicado')}</strong></p>
                   </div>
 
                   <div class="flex items-center justify-between pt-2 border-t border-slate-100">
                     ${state.currentRole === 'cliente' ? `<span class="text-xs font-semibold text-emerald-700">Finca asignada</span>` : `<button onclick="window.handleFincaChange('${f.id}')" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">
                       ${isSelected ? 'Seleccionada' : 'Seleccionar finca'}
                     </button>`}
-                    <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer" title="Ver información técnica y lotes de ${f.nombre}" aria-label="Ver detalles de ${f.nombre}">
+                    <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer" title="Ver información técnica y lotes de ${escapeHtml(f.nombre)}" aria-label="Ver detalles de ${escapeHtml(f.nombre)}">
                       <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
                   </div>
@@ -1815,11 +1871,11 @@ function renderFincasView() {
             <tbody class="divide-y divide-slate-100">
               ${fincas.map(f => `
                 <tr class="hover:bg-slate-50/80 transition-colors">
-                  <td class="p-3.5 font-bold text-slate-900">${f.nombre}</td>
-                  <td class="p-3.5 text-slate-600">${f.ubicacion}</td>
+                  <td class="p-3.5 font-bold text-slate-900">${escapeHtml(f.nombre)}</td>
+                  <td class="p-3.5 text-slate-600">${escapeHtml(f.ubicacion)}</td>
                   <td class="p-3.5 font-mono">${f.areaTotal} Ha</td>
                   <td class="p-3.5 font-mono">${isClient ? getRecordsForFinca(state.cultivos, f.id).length : f.cultivosActivos}</td>
-                  ${isClient ? `<td class="p-3.5">${escapeHtml(f.productoPrincipal || 'No indicado')}</td>` : ''}
+                  ${isClient ? `<td class="p-3.5">${escapeHtml(getFarmMainProduct(f) || 'No indicado')}</td>` : ''}
                   <td class="p-3.5 font-mono">${isClient ? getRecordsForFinca(state.sensores, f.id).length : f.sensoresActivos}</td>
                   <td class="p-3.5">
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${f.estado.includes('Saludable') ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
@@ -1827,7 +1883,7 @@ function renderFincasView() {
                     </span>
                   </td>
                   <td class="p-3.5 text-right space-x-1">
-                    <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors" title="Ver detalles" aria-label="Ver detalles de ${f.nombre}">
+                    <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors" title="Ver detalles" aria-label="Ver detalles de ${escapeHtml(f.nombre)}">
                       <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
                     ${state.currentRole === 'cliente' ? '' : `<button onclick="window.handleFincaChange('${f.id}')" class="p-2 ${f.id === state.selectedFincaId ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'} rounded-lg transition-colors" title="${f.id === state.selectedFincaId ? 'Finca activa' : 'Seleccionar finca'}" aria-label="${f.id === state.selectedFincaId ? 'Finca activa' : `Seleccionar ${f.nombre}`}">
@@ -3204,7 +3260,7 @@ window.openFincaDetailModal = function(fincaId) {
   const container = document.getElementById('modal-container');
   if (!container) return;
 
-  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
+  if (!canClientAccessFinca(fincaId)) return;
   const f = state.fincas.find(item => item.id === fincaId);
   if (!f) return;
   const isClient = state.currentRole === 'cliente';
@@ -3226,7 +3282,7 @@ window.openFincaDetailModal = function(fincaId) {
       <div class="relative h-48 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-inner">
         <img
           src="${f.imagen}"
-          alt="${f.nombre}"
+          alt="${escapeHtml(f.nombre)}"
           class="w-full h-full object-cover"
           onerror="this.onerror=null; this.src='/images/finca_palmas.jpg';"
         />
@@ -3241,10 +3297,10 @@ window.openFincaDetailModal = function(fincaId) {
               </span>
             ` : ''}
           </div>
-          <h2 class="text-xl font-bold tracking-tight text-white">${f.nombre}</h2>
+          <h2 class="text-xl font-bold tracking-tight text-white">${escapeHtml(f.nombre)}</h2>
           <p class="text-xs text-slate-300 flex items-center gap-1 mt-0.5">
             <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
-            ${f.ubicacion} · Responsable: ${f.responsable}
+            ${escapeHtml(f.ubicacion)} · Responsable: ${escapeHtml(f.responsable)}
           </p>
         </div>
       </div>
@@ -3278,7 +3334,7 @@ window.openFincaDetailModal = function(fincaId) {
         <p class="text-slate-600 text-[11px] leading-relaxed">
           ${f.descripcion || 'Predio tecnificado registrado en la plataforma AgroControl con telemetría continua.'}
         </p>
-        <p class="text-slate-600 text-[11px]"><strong>Producto principal:</strong> ${escapeHtml(f.productoPrincipal || 'No indicado')}</p>
+        <p class="text-slate-600 text-[11px]"><strong>Producto principal:</strong> ${escapeHtml(getFarmMainProduct(f) || 'No indicado')}</p>
       </div>
 
       <!-- Lotes en esta Finca -->
@@ -3330,12 +3386,12 @@ window.openFincaDetailModal = function(fincaId) {
     </div>
   `;
 
-  container.innerHTML = renderModalWrapper(`Detalles de ${f.nombre}`, 'home', bodyHTML, 'max-w-2xl');
+  container.innerHTML = renderModalWrapper(`Detalles de ${escapeHtml(f.nombre)}`, 'home', bodyHTML, 'max-w-2xl');
   if (window.lucide) window.lucide.createIcons();
 };
 
 window.selectFincaAndClose = function(fincaId) {
-  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
+  if (!canClientAccessFinca(fincaId)) return;
   state.selectedFincaId = fincaId;
   const fincaLotes = state.getLotesForFinca(fincaId);
   if (fincaLotes.length > 0) {
@@ -3348,7 +3404,7 @@ window.selectFincaAndClose = function(fincaId) {
 };
 
 window.selectFincaAndGoToTerrenos = function(fincaId) {
-  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
+  if (!canClientAccessFinca(fincaId)) return;
   state.selectedFincaId = fincaId;
   const fincaLotes = state.getLotesForFinca(fincaId);
   if (fincaLotes.length > 0) {
@@ -3362,7 +3418,7 @@ window.selectFincaAndGoToTerrenos = function(fincaId) {
 
 
 window.openNewFincaModal = function() {
-  if (state.currentRole === 'cliente') return;
+  const isClient = state.currentRole === 'cliente';
   const container = document.getElementById('modal-container');
   if (!container) return;
 
@@ -3388,19 +3444,19 @@ window.openNewFincaModal = function() {
       </div>
       <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
         <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
-        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs">Guardar Finca</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs">${isClient ? 'Agregar finca' : 'Guardar Finca'}</button>
       </div>
     </form>
   `;
 
-  container.innerHTML = renderModalWrapper('Registrar Nueva Finca', 'home', bodyHTML);
+  container.innerHTML = renderModalWrapper(isClient ? 'Agregar otra finca' : 'Registrar Nueva Finca', 'home', bodyHTML);
   if (window.lucide) window.lucide.createIcons();
 };
 
 window.saveNewFincaSubmit = function(event) {
   event.preventDefault();
-  if (state.currentRole === 'cliente') return;
-  if (!validateForm(event)) return;
+  const isClient = state.currentRole === 'cliente';
+  if (!state.currentUser || !validateForm(event)) return;
   const nombre = document.getElementById('new-finca-nombre').value.trim();
   const ubicacion = document.getElementById('new-finca-ubicacion').value.trim();
   const areaTotal = Number(document.getElementById('new-finca-area').value);
@@ -3408,25 +3464,29 @@ window.saveNewFincaSubmit = function(event) {
 
   if (nombre && ubicacion && areaTotal) {
     const newFinca = {
-      id: 'ter-' + Date.now(),
+      id: 'ter-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
       nombre,
       ubicacion,
       areaTotal,
       responsable,
-      cultivosActivos: 1,
-      sensoresActivos: 4,
+      cultivosActivos: isClient ? 0 : 1,
+      sensoresActivos: isClient ? 0 : 4,
       estado: 'Saludable',
       imagen: '/images/finca_palmas.jpg',
       descripcion: 'Predio registrado en AgroControl.'
     };
     state.fincas.push(newFinca);
+    if (isClient) {
+      state.currentUser.fincaIds = [...getClientFincaIds(state.currentUser), newFinca.id];
+    }
     state.selectedFincaId = newFinca.id;
+    state.selectedLoteId = state.getLotesForFinca(newFinca.id)[0]?.id || '';
     state.addAuditLog('Fincas', 'Registro', `Finca ${nombre} creada exitosamente.`);
     state.save();
     window.closeModal();
     renderHeader();
     renderCurrentView();
-    window.showToast('Registro exitoso: finca creada correctamente.');
+    window.showToast(isClient ? 'Finca agregada correctamente a tu cuenta.' : 'Registro exitoso: finca creada correctamente.');
   }
 };
 
@@ -3504,7 +3564,7 @@ function renderFarmNameField(id, fincaNombre = state.activeFinca?.nombre || '') 
   return `
     <div>
       <label for="${id}" class="block text-xs font-semibold text-slate-700 mb-1">Nombre de la finca</label>
-      <input id="${id}" name="fincaNombre" value="${fincaNombre}" readonly aria-readonly="true" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600 cursor-not-allowed" />
+      <input id="${id}" name="fincaNombre" value="${escapeHtml(fincaNombre)}" readonly aria-readonly="true" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600 cursor-not-allowed" />
     </div>
   `;
 }
