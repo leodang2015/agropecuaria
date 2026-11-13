@@ -3174,11 +3174,6 @@ window.showLoginMessage = function(message, isError = true) {
   }
 };
 
-function escapeHtml(value) {
-  const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-  return String(value ?? '').replace(/[&<>"']/g, character => entities[character]);
-}
-
 // ----------------------------------------------------
 // MODALS & ACTIONS (Cultivo Edit, Producción Edit, etc.)
 // ----------------------------------------------------
