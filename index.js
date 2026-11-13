@@ -495,25 +495,25 @@ const initialCultivos = [
 ];
 
 const initialSensores = [
-  { id: 'sens-1', codigo: 'SEN-S01', tipo: 'Humedad de Suelo', lote: 'Lote B (Tomate)', valor: '35%', estado: 'Advertencia', bateria: 92, senal: 'Fuerte (-68 dBm)' },
-  { id: 'sens-2', codigo: 'SEN-T01', tipo: 'Temperatura Suelo', lote: 'Lote B (Tomate)', valor: '24°C', estado: 'Normal', bateria: 95, senal: 'Fuerte (-65 dBm)' },
-  { id: 'sens-3', codigo: 'SEN-R01', tipo: 'Radiación Solar', lote: 'Lote B (Tomate)', valor: '720 W/m²', estado: 'Normal', bateria: 88, senal: 'Excelente (-58 dBm)' },
-  { id: 'sens-4', codigo: 'SEN-P01', tipo: 'pH y Conductividad', lote: 'Lote B (Tomate)', valor: '6.2 pH', estado: 'Normal', bateria: 90, senal: 'Fuerte (-70 dBm)' },
-  { id: 'sens-5', codigo: 'SEN-S02', tipo: 'Humedad de Suelo', lote: 'Lote A (Café)', valor: '62%', estado: 'Saludable', bateria: 97, senal: 'Excelente (-52 dBm)' },
-  { id: 'sens-6', codigo: 'SEN-C01', tipo: 'Estación Meteorológica', lote: 'Central Palmas', valor: '68% Hum / 8 km/h', estado: 'Saludable', bateria: 100, senal: 'Excelente (-48 dBm)' }
+  { id: 'sens-1', codigo: 'SEN-S01', tipo: 'Humedad de Suelo', lote: 'Lote B (Tomate)', loteId: 'lot-b', terrenoId: 'ter-2', valor: '35%', estado: 'Advertencia', bateria: 92, senal: 'Fuerte (-68 dBm)' },
+  { id: 'sens-2', codigo: 'SEN-T01', tipo: 'Temperatura Suelo', lote: 'Lote B (Tomate)', loteId: 'lot-b', terrenoId: 'ter-2', valor: '24°C', estado: 'Normal', bateria: 95, senal: 'Fuerte (-65 dBm)' },
+  { id: 'sens-3', codigo: 'SEN-R01', tipo: 'Radiación Solar', lote: 'Lote B (Tomate)', loteId: 'lot-b', terrenoId: 'ter-2', valor: '720 W/m²', estado: 'Normal', bateria: 88, senal: 'Excelente (-58 dBm)' },
+  { id: 'sens-4', codigo: 'SEN-P01', tipo: 'pH y Conductividad', lote: 'Lote B (Tomate)', loteId: 'lot-b', terrenoId: 'ter-2', valor: '6.2 pH', estado: 'Normal', bateria: 90, senal: 'Fuerte (-70 dBm)' },
+  { id: 'sens-5', codigo: 'SEN-S02', tipo: 'Humedad de Suelo', lote: 'Lote A (Café)', loteId: 'lot-a', terrenoId: 'ter-1', valor: '62%', estado: 'Saludable', bateria: 97, senal: 'Excelente (-52 dBm)' },
+  { id: 'sens-6', codigo: 'SEN-C01', tipo: 'Estación Meteorológica', lote: 'Central Palmas', terrenoId: 'ter-1', valor: '68% Hum / 8 km/h', estado: 'Saludable', bateria: 100, senal: 'Excelente (-48 dBm)' }
 ];
 
 const initialAlertas = [
-  { id: 'alt-1', severidad: 'Advertencia', titulo: 'Baja humedad del suelo en Lote B', detalle: 'Humedad al 35% en cultivo de Tomate. Riego recomendado en las próximas 24 horas.', fecha: 'Hoy 08:30', lote: 'Lote B' },
-  { id: 'alt-2', severidad: 'Advertencia', titulo: 'Monitoreo diario sugerido', detalle: 'Variación térmica nocturna superior a 6°C en Lote B.', fecha: 'Ayer 22:15', lote: 'Lote B' },
-  { id: 'alt-3', severidad: 'Info', titulo: 'Mantenimiento de Sensores', detalle: 'Calibración trimestral completada en Lote A y Estación Central.', fecha: 'Hace 2 días', lote: 'Central' }
+  { id: 'alt-1', severidad: 'Advertencia', titulo: 'Baja humedad del suelo en Lote B', detalle: 'Humedad al 35% en cultivo de Tomate. Riego recomendado en las próximas 24 horas.', fecha: 'Hoy 08:30', lote: 'Lote B', loteId: 'lot-b', terrenoId: 'ter-2' },
+  { id: 'alt-2', severidad: 'Advertencia', titulo: 'Monitoreo diario sugerido', detalle: 'Variación térmica nocturna superior a 6°C en Lote B.', fecha: 'Ayer 22:15', lote: 'Lote B', loteId: 'lot-b', terrenoId: 'ter-2' },
+  { id: 'alt-3', severidad: 'Info', titulo: 'Mantenimiento de Sensores', detalle: 'Calibración trimestral completada en Lote A y Estación Central.', fecha: 'Hace 2 días', lote: 'Central', loteId: 'lot-a', terrenoId: 'ter-1' }
 ];
 
 const initialActividades = [
-  { id: 'act-1', cultivoId: 'cul-tomate', loteId: 'lot-b', tipoActividad: 'Riego aplicado', descripcion: 'Riego por goteo con electrobomba automatizada', fecha: 'Hoy 08:15', responsable: 'Juan Díaz', estado: 'realizada' },
-  { id: 'act-2', cultivoId: 'cul-tomate', loteId: 'lot-b', tipoActividad: 'Fertilización', descripcion: 'Fertilización foliar balanceada con micronutrientes', fecha: 'Ayer 14:30', responsable: 'María Ruiz', estado: 'realizada' },
-  { id: 'act-3', cultivoId: 'cul-tomate', loteId: 'lot-b', tipoActividad: 'Inspección visual', descripcion: 'Monitoreo de vigor vegetativo y sensores', fecha: '3 días atrás', responsable: 'Juan Díaz', estado: 'realizada' },
-  { id: 'act-4', cultivoId: 'cul-cafe', loteId: 'lot-a', tipoActividad: 'Muestreo de Plagas', descripcion: 'Control focalizado de broca y roya', fecha: '4 días atrás', responsable: 'Carlos Restrepo', estado: 'realizada' }
+  { id: 'act-1', cultivoId: 'cul-tomate', loteId: 'lot-b', terrenoId: 'ter-2', tipoActividad: 'Riego aplicado', descripcion: 'Riego por goteo con electrobomba automatizada', fecha: 'Hoy 08:15', responsable: 'Juan Díaz', estado: 'realizada' },
+  { id: 'act-2', cultivoId: 'cul-tomate', loteId: 'lot-b', terrenoId: 'ter-2', tipoActividad: 'Fertilización', descripcion: 'Fertilización foliar balanceada con micronutrientes', fecha: 'Ayer 14:30', responsable: 'María Ruiz', estado: 'realizada' },
+  { id: 'act-3', cultivoId: 'cul-tomate', loteId: 'lot-b', terrenoId: 'ter-2', tipoActividad: 'Inspección visual', descripcion: 'Monitoreo de vigor vegetativo y sensores', fecha: '3 días atrás', responsable: 'Juan Díaz', estado: 'realizada' },
+  { id: 'act-4', cultivoId: 'cul-cafe', loteId: 'lot-a', terrenoId: 'ter-1', tipoActividad: 'Muestreo de Plagas', descripcion: 'Control focalizado de broca y roya', fecha: '4 días atrás', responsable: 'Carlos Restrepo', estado: 'realizada' }
 ];
 
 const initialQuejas = [
@@ -715,6 +715,45 @@ class StateManager {
 
 const state = new StateManager();
 
+function getRecordFincaId(record) {
+  const lotReferences = [record.loteId, record.lote, record.loteNombre].filter(Boolean);
+  for (const lotReference of lotReferences) {
+    const normalizedReference = String(lotReference).toLowerCase();
+    const lot = state.lotes.find(item =>
+      item.id === lotReference ||
+      normalizedReference === item.identificador.toLowerCase() ||
+      normalizedReference.startsWith(`${item.identificador.toLowerCase()} (`)
+    );
+    if (lot) return lot.terrenoId;
+  }
+  return record.terrenoId || record.fincaId || '';
+}
+
+function getVisibleRecords(records) {
+  if (state.currentRole !== 'cliente') return records;
+  return getRecordsForFinca(records, state.currentUser.fincaId);
+}
+
+function getRecordsForFinca(records, fincaId) {
+  return records.filter(record => getRecordFincaId(record) === fincaId);
+}
+
+function getVisibleFincas() {
+  return state.currentRole === 'cliente'
+    ? state.fincas.filter(finca => finca.id === state.currentUser.fincaId)
+    : state.fincas;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
+
 function validateForm(event) {
   const form = event.currentTarget;
   const invalidField = Array.from(form.elements).find(field =>
@@ -776,7 +815,7 @@ window.openGlobalSearchResult = function(type, id) {
     window.switchView('fincas');
   } else if (type === 'lote') {
     const lote = state.lotes.find(item => item.id === id);
-    if (!lote) return;
+    if (!lote || (state.currentRole === 'cliente' && lote.terrenoId !== state.currentUser.fincaId)) return;
     state.selectedFincaId = lote.terrenoId;
     state.selectedLoteId = lote.id;
     state.save();
@@ -799,13 +838,13 @@ function renderGlobalSearchResults() {
   }
 
   const searchableItems = [
-    ...state.fincas.filter(item => state.currentRole !== 'cliente' || item.id === state.currentUser.fincaId)
+    ...getVisibleFincas()
       .map(item => ({ type: 'finca', id: item.id, label: item.nombre, detail: item.ubicacion, icon: 'home' })),
-    ...state.lotes.filter(item => state.currentRole !== 'cliente' || item.terrenoId === state.currentUser.fincaId)
+    ...getVisibleRecords(state.lotes)
       .map(item => ({ type: 'lote', id: item.id, label: item.identificador, detail: item.cultivoNombre, icon: 'map' })),
-    ...state.cultivos.filter(item => state.currentRole !== 'cliente' || item.terrenoId === state.currentUser.fincaId)
+    ...getVisibleRecords(state.cultivos)
       .map(item => ({ type: 'cultivo', id: item.id, label: item.nombre, detail: item.tipoCultivo, icon: 'sprout' })),
-    ...(state.currentRole === 'cliente' ? [] : state.sensores.map(item => ({ type: 'sensor', id: item.id, label: item.codigo, detail: `${item.tipo} · ${item.lote}`, icon: 'cpu' })))
+    ...getVisibleRecords(state.sensores).map(item => ({ type: 'sensor', id: item.id, label: item.codigo, detail: `${item.tipo} · ${item.lote}`, icon: 'cpu' }))
   ];
   const matches = searchableItems.filter(item =>
     `${item.label} ${item.detail}`.toLowerCase().includes(query)
@@ -842,6 +881,10 @@ window.showToast = function(message) {
 };
 
 window.switchView = function(viewId, param = null) {
+  const clientViews = ['dashboard', 'fincas', 'terrenos', 'cultivos', 'ficha_cultivo', 'sensores', 'clima', 'alertas', 'actividades', 'produccion', 'quejas'];
+  if (state.currentRole === 'cliente' && !clientViews.includes(viewId)) return;
+  if (state.currentRole === 'cliente' && viewId === 'ficha_cultivo' && param &&
+      !getVisibleRecords(state.cultivos).some(cultivo => cultivo.id === param)) return;
   state.activeView = viewId;
   if (viewId === 'ficha_cultivo' && param) {
     state.selectedCultivoId = param;
@@ -873,6 +916,7 @@ window.setLoteFilters = function(status, crop) {
 };
 
 window.openComplaintModal = function() {
+  if (state.currentRole !== 'cliente') return;
   const container = document.getElementById('modal-container');
   if (!container) return;
   const bodyHTML = `
@@ -896,8 +940,47 @@ window.openComplaintModal = function() {
   if (window.lucide) window.lucide.createIcons();
 };
 
+window.openClientProductModal = function() {
+  if (state.currentRole !== 'cliente') return;
+  const finca = state.fincas.find(item => item.id === state.currentUser.fincaId);
+  if (!finca) {
+    window.showToast('No se encontró la finca asociada a tu cuenta.');
+    return;
+  }
+  const bodyHTML = `
+    <form novalidate onsubmit="window.saveClientProductSubmit(event)" class="space-y-4">
+      ${renderFarmNameField('client-product-finca', finca.nombre)}
+      <div>
+        <label for="client-product-name" class="block text-xs font-semibold text-slate-700 mb-1">Producto principal *</label>
+        <input id="client-product-name" name="producto" value="${escapeHtml(finca.productoPrincipal || '')}" required maxlength="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" placeholder="Ej. Café, cacao o aguacate" />
+      </div>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl">Guardar producto</button>
+      </div>
+    </form>
+  `;
+  openRegistrationModal('Producto principal de mi finca', 'sprout', bodyHTML);
+};
+
+window.saveClientProductSubmit = function(event) {
+  event.preventDefault();
+  if (state.currentRole !== 'cliente' || !validateForm(event)) return;
+  const finca = state.fincas.find(item => item.id === state.currentUser.fincaId);
+  if (!finca) {
+    window.showToast('No se encontró la finca asociada a tu cuenta.');
+    return;
+  }
+  finca.productoPrincipal = event.currentTarget.elements.producto.value.trim();
+  state.save();
+  window.closeModal();
+  renderCurrentView();
+  window.showToast('Producto principal actualizado correctamente.');
+};
+
 window.submitComplaint = function(event) {
   event.preventDefault();
+  if (state.currentRole !== 'cliente') return;
   if (!validateForm(event)) return;
   const finca = state.activeFinca;
   if (!finca || !state.currentUser) return;
@@ -920,6 +1003,7 @@ window.submitComplaint = function(event) {
 };
 
 window.updateComplaintStatus = function(complaintId, status) {
+  if (state.currentRole === 'cliente') return;
   const complaint = state.quejas.find(item => item.id === complaintId);
   if (!complaint) return;
   complaint.estado = status;
@@ -979,10 +1063,10 @@ function renderHeader() {
     container.innerHTML = `
       <div class="flex items-center gap-3">
         <!-- Notification Bell with Active Badge -->
-        <button onclick="window.switchView('alertas')" class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors" title="3 Alertas activas del sistema">
+        <button onclick="window.switchView('alertas')" class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors" title="${getVisibleRecords(state.alertas).length} alertas activas">
           <i data-lucide="bell" class="w-5 h-5"></i>
           <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none ring-2 ring-white">
-            ${state.alertas.length}
+            ${getVisibleRecords(state.alertas).length}
           </span>
         </button>
 
@@ -1018,9 +1102,19 @@ function initNavigation() {
   if (!navContainer) return;
 
   const navItems = [
-    { id: 'dashboard', label: state.currentRole === 'agronomo' ? 'Panel de ingeniería' : state.currentRole === 'cliente' ? 'Mi finca' : state.currentRole === 'tecnico' ? 'Panel técnico' : 'Dashboard activo', icon: 'layout-dashboard' },
+    { id: 'dashboard', label: state.currentRole === 'agronomo' ? 'Panel de ingeniería' : state.currentRole === 'cliente' ? 'Resumen' : state.currentRole === 'tecnico' ? 'Panel técnico' : 'Dashboard activo', icon: 'layout-dashboard' },
     ...(state.currentRole === 'cliente'
-      ? [{ id: 'quejas', label: 'Mis solicitudes', icon: 'message-square' }]
+      ? [
+        { id: 'fincas', label: 'Mi finca', icon: 'home' },
+        { id: 'terrenos', label: 'Lotes', icon: 'map' },
+        { id: 'cultivos', label: 'Cultivos', icon: 'sprout' },
+        { id: 'sensores', label: 'Sensores', icon: 'cpu' },
+        { id: 'clima', label: 'Clima', icon: 'cloud-sun' },
+        { id: 'alertas', label: 'Alertas', icon: 'bell', badge: getVisibleRecords(state.alertas).length },
+        { id: 'actividades', label: 'Actividades', icon: 'calendar-check' },
+        { id: 'produccion', label: 'Producción', icon: 'package' },
+        { id: 'quejas', label: 'Mis solicitudes', icon: 'message-square' }
+      ]
       : state.currentRole === 'tecnico'
         ? [{ id: 'quejas', label: 'Quejas de clientes', icon: 'message-square', badge: state.quejas.filter(q => q.estado !== 'Resuelta').length }, { id: 'sensores', label: 'Sensores', icon: 'cpu' }, { id: 'alertas', label: 'Alertas', icon: 'bell', badge: state.alertas.length }]
         : [
@@ -1086,7 +1180,8 @@ function renderCurrentView() {
   const main = document.getElementById('main-content');
   if (!main) return;
 
-  if (state.currentRole === 'cliente' && !['dashboard', 'quejas'].includes(state.activeView)) {
+  const clientViews = ['dashboard', 'fincas', 'terrenos', 'cultivos', 'ficha_cultivo', 'sensores', 'clima', 'alertas', 'actividades', 'produccion', 'quejas'];
+  if (state.currentRole === 'cliente' && !clientViews.includes(state.activeView)) {
     state.activeView = 'dashboard';
   }
   if (state.currentRole === 'tecnico' && !['dashboard', 'quejas', 'sensores', 'alertas'].includes(state.activeView)) {
@@ -1304,11 +1399,11 @@ function renderDashboardView() {
               Alertas recientes
             </h4>
             <button onclick="window.switchView('alertas')" class="text-xs text-emerald-700 font-semibold hover:underline">
-              Ver todas (${state.alertas.length})
+              Ver todas (${getVisibleRecords(state.alertas).length})
             </button>
           </div>
           <div class="space-y-2.5">
-            ${state.alertas.map(a => `
+            ${getVisibleRecords(state.alertas).map(a => `
               <div class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
                 <span class="w-2.5 h-2.5 rounded-full mt-1.5 ${a.severidad === 'Advertencia' ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
                 <div class="flex-1 min-w-0">
@@ -1333,7 +1428,7 @@ function renderDashboardView() {
             </button>
           </div>
           <div class="space-y-2.5">
-            ${state.actividades.slice(0, 3).map(act => `
+            ${getVisibleRecords(state.actividades).slice(0, 3).map(act => `
               <div class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
                 <div class="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg">
                   <i data-lucide="check" class="w-3.5 h-3.5"></i>
@@ -1431,6 +1526,7 @@ function renderEngineerDashboardView() {
 function renderClientDashboardView() {
   const finca = state.activeFinca;
   const lots = state.getLotesForFinca(finca.id);
+  const cultivoCount = getRecordsForFinca(state.cultivos, finca.id).length;
   const myComplaints = state.quejas.filter(complaint => complaint.clienteId === state.currentUser.id);
   return `
     <div class="space-y-5">
@@ -1448,7 +1544,7 @@ function renderClientDashboardView() {
         ${[
           ['Área de la finca', `${finca.areaTotal} Ha`, 'land-plot'],
           ['Lotes', lots.length, 'map'],
-          ['Cultivos activos', finca.cultivosActivos, 'sprout'],
+          ['Cultivos activos', cultivoCount, 'sprout'],
           ['Solicitudes abiertas', myComplaints.filter(item => item.estado !== 'Resuelta').length, 'messages-square']
         ].map(([label, value, icon]) => `
           <article class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
@@ -1458,11 +1554,20 @@ function renderClientDashboardView() {
           </article>
         `).join('')}
       </div>
+      <section class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold text-slate-500">Producto principal de la finca</p>
+          <p class="text-lg font-bold text-slate-900 mt-1">${escapeHtml(finca.productoPrincipal || 'Aún no indicado')}</p>
+        </div>
+        <button onclick="window.openClientProductModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-xl">
+          <i data-lucide="sprout" class="w-4 h-4"></i> Indicar producto
+        </button>
+      </section>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <section class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
           <h2 class="font-bold text-slate-900 text-sm">Resumen de mi finca</h2>
           <div class="mt-4 space-y-3">
-            ${lots.slice(0, 4).map(lot => `
+            ${lots.map(lot => `
               <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div class="min-w-0">
                   <p class="text-xs font-semibold text-slate-800 truncate">${lot.identificador}</p>
@@ -1576,6 +1681,8 @@ function renderQuejasView() {
 // ----------------------------------------------------
 function renderFincasView() {
   const isTarjetas = state.fincasViewMode === 'tarjetas';
+  const fincas = getVisibleFincas();
+  const isClient = state.currentRole === 'cliente';
 
   return `
     <div class="space-y-5">
@@ -1584,19 +1691,19 @@ function renderFincasView() {
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-slate-900">Mis Fincas</h1>
           <p class="text-xs text-slate-500 mt-0.5">
-            Administra y consulta la información general de tus fincas.
+            ${isClient ? 'Consulta la información de tu finca.' : 'Administra y consulta la información general de tus fincas.'}
           </p>
         </div>
 
-        <button onclick="window.openNewFincaModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+        ${state.currentRole === 'cliente' ? '' : `<button onclick="window.openNewFincaModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>Registrar nueva finca</span>
-        </button>
+        </button>`}
       </div>
 
       <!-- Filters & View Switcher Bar (Page 3) -->
       <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex flex-wrap items-center gap-2">
+        ${isClient ? `<span class="text-xs font-semibold text-emerald-700">${fincas[0]?.nombre || 'Finca asignada'}</span>` : `<div class="flex flex-wrap items-center gap-2">
           <select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none">
             <option>Ubicación (Todas)</option>
             <option>Valle del Cauca</option>
@@ -1620,10 +1727,8 @@ function renderFincasView() {
             <option>24 sensores</option>
           </select>
 
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[11px] font-semibold">
-            Saludable
-          </span>
-        </div>
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[11px] font-semibold">Saludable</span>
+        </div>`}
 
         <!-- View Switcher Toggle -->
         <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
@@ -1639,7 +1744,7 @@ function renderFincasView() {
       <!-- Content: Grid of Farm Cards or Table -->
       ${isTarjetas ? `
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          ${state.fincas.map(f => {
+          ${fincas.map(f => {
             const isSelected = f.id === state.selectedFincaId;
             const statusClass = f.estado.includes('Saludable')
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -1674,13 +1779,14 @@ function renderFincasView() {
                     <h3 class="font-bold text-slate-900 text-sm">${f.nombre}</h3>
                     <p class="text-xs text-slate-500 mt-0.5">${f.ubicacion}</p>
                     <p class="text-xs font-medium text-slate-700 mt-2">Área: <strong>${f.areaTotal} hectáreas</strong></p>
-                    <p class="text-[11px] text-slate-500 mt-0.5">${f.cultivosActivos} cultivos activos · ${f.sensoresActivos} sensores</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">${isClient ? getRecordsForFinca(state.cultivos, f.id).length : f.cultivosActivos} cultivos activos · ${isClient ? getRecordsForFinca(state.sensores, f.id).length : f.sensoresActivos} sensores</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Producto principal: <strong class="text-slate-700">${escapeHtml(f.productoPrincipal || 'No indicado')}</strong></p>
                   </div>
 
                   <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <button onclick="window.handleFincaChange('${f.id}')" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">
+                    ${state.currentRole === 'cliente' ? `<span class="text-xs font-semibold text-emerald-700">Finca asignada</span>` : `<button onclick="window.handleFincaChange('${f.id}')" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">
                       ${isSelected ? 'Seleccionada' : 'Seleccionar finca'}
-                    </button>
+                    </button>`}
                     <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer" title="Ver información técnica y lotes de ${f.nombre}" aria-label="Ver detalles de ${f.nombre}">
                       <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
@@ -1700,19 +1806,21 @@ function renderFincasView() {
                 <th class="p-3.5">Ubicación</th>
                 <th class="p-3.5">Área Total</th>
                 <th class="p-3.5">Cultivos</th>
+                ${isClient ? '<th class="p-3.5">Producto principal</th>' : ''}
                 <th class="p-3.5">Sensores</th>
                 <th class="p-3.5">Estado</th>
                 <th class="p-3.5 text-right">Acción</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              ${state.fincas.map(f => `
+              ${fincas.map(f => `
                 <tr class="hover:bg-slate-50/80 transition-colors">
                   <td class="p-3.5 font-bold text-slate-900">${f.nombre}</td>
                   <td class="p-3.5 text-slate-600">${f.ubicacion}</td>
                   <td class="p-3.5 font-mono">${f.areaTotal} Ha</td>
-                  <td class="p-3.5 font-mono">${f.cultivosActivos}</td>
-                  <td class="p-3.5 font-mono">${f.sensoresActivos}</td>
+                  <td class="p-3.5 font-mono">${isClient ? getRecordsForFinca(state.cultivos, f.id).length : f.cultivosActivos}</td>
+                  ${isClient ? `<td class="p-3.5">${escapeHtml(f.productoPrincipal || 'No indicado')}</td>` : ''}
+                  <td class="p-3.5 font-mono">${isClient ? getRecordsForFinca(state.sensores, f.id).length : f.sensoresActivos}</td>
                   <td class="p-3.5">
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${f.estado.includes('Saludable') ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
                       ${f.estado}
@@ -1722,9 +1830,9 @@ function renderFincasView() {
                     <button onclick="window.openFincaDetailModal('${f.id}')" class="p-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors" title="Ver detalles" aria-label="Ver detalles de ${f.nombre}">
                       <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="window.handleFincaChange('${f.id}')" class="p-2 ${f.id === state.selectedFincaId ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'} rounded-lg transition-colors" title="${f.id === state.selectedFincaId ? 'Finca activa' : 'Seleccionar finca'}" aria-label="${f.id === state.selectedFincaId ? 'Finca activa' : `Seleccionar ${f.nombre}`}">
+                    ${state.currentRole === 'cliente' ? '' : `<button onclick="window.handleFincaChange('${f.id}')" class="p-2 ${f.id === state.selectedFincaId ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'} rounded-lg transition-colors" title="${f.id === state.selectedFincaId ? 'Finca activa' : 'Seleccionar finca'}" aria-label="${f.id === state.selectedFincaId ? 'Finca activa' : `Seleccionar ${f.nombre}`}">
                       <i data-lucide="${f.id === state.selectedFincaId ? 'check' : 'check-circle'}" class="w-4 h-4"></i>
-                    </button>
+                    </button>`}
                   </td>
                 </tr>
               `).join('')}
@@ -1762,9 +1870,10 @@ function renderTerrenosView() {
   const lotCrops = Array.from(new Set(fincaLotes.map(l => l.cultivoNombre))).filter(Boolean);
 
   // Find related cultivo if any for the "Ver en detalle" button
+  const visibleCultivos = getVisibleRecords(state.cultivos);
   const relatedCultivo = selectedLote
-    ? (state.cultivos.find(c => c.nombre.toLowerCase().includes((selectedLote.cultivoNombre || '').toLowerCase().split(' ')[0])) || state.cultivos[0])
-    : state.cultivos[0];
+    ? (visibleCultivos.find(c => c.loteId === selectedLote.id) || visibleCultivos[0])
+    : visibleCultivos[0];
 
   return `
     <div class="space-y-5">
@@ -1782,10 +1891,10 @@ function renderTerrenosView() {
           </p>
         </div>
 
-        <button onclick="window.openNewLoteModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+        ${state.currentRole === 'cliente' ? '' : `<button onclick="window.openNewLoteModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>Registrar nuevo lote</span>
-        </button>
+        </button>`}
       </div>
 
       <!-- Filters & View Switcher Bar (Page 4) -->
@@ -1850,7 +1959,7 @@ function renderTerrenosView() {
                 <th class="p-3.5">Sensores IoT</th>
                 <th class="p-3.5">Tipo de Suelo</th>
                 <th class="p-3.5">Estado</th>
-                <th class="p-3.5 text-right">Acciones</th>
+                <th class="p-3.5 text-right">${state.currentRole === 'cliente' ? 'Detalle' : 'Acciones'}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -1886,9 +1995,9 @@ function renderTerrenosView() {
                       <button onclick="window.selectLote('${l.id}'); window.setLotesViewMode('mapa');" class="p-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors" title="Ver en mapa" aria-label="Ver ${l.identificador} en el mapa">
                         <i data-lucide="map" class="w-4 h-4"></i>
                       </button>
-                      <button onclick="window.openProgramarRiegoModal('${l.identificador}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors" title="Programar riego" aria-label="Programar riego para ${l.identificador}">
+                      ${state.currentRole === 'cliente' ? '' : `<button onclick="window.openProgramarRiegoModal('${l.identificador}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors" title="Programar riego" aria-label="Programar riego para ${l.identificador}">
                         <i data-lucide="droplets" class="w-4 h-4"></i>
-                      </button>
+                      </button>`}
                     </td>
                   </tr>
                 `;
@@ -2092,15 +2201,15 @@ function renderTerrenosView() {
 
             <!-- Action Buttons (Page 4: Ver en detalle & Programar riego) -->
             <div class="space-y-2 pt-4 border-t border-slate-100">
-              <button onclick="window.switchView('ficha_cultivo', '${relatedCultivo ? relatedCultivo.id : 'cul-tomate'}')" class="w-full py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5">
+              ${relatedCultivo ? `<button onclick="window.switchView('ficha_cultivo', '${relatedCultivo.id}')" class="w-full py-2.5 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5">
                 <i data-lucide="eye" class="w-4 h-4"></i>
                 <span>Ver en detalle</span>
-              </button>
+              </button>` : ''}
 
-              <button onclick="window.openProgramarRiegoModal('${selectedLote ? selectedLote.identificador : ''}')" class="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-1.5">
+              ${state.currentRole === 'cliente' ? '' : `<button onclick="window.openProgramarRiegoModal('${selectedLote ? selectedLote.identificador : ''}')" class="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-1.5">
                 <i data-lucide="droplets" class="w-4 h-4 text-emerald-600"></i>
                 <span>Programar riego</span>
-              </button>
+              </button>`}
             </div>
           </div>
         </div>
@@ -2113,6 +2222,8 @@ function renderTerrenosView() {
 // SCREEN 4: CULTIVOS (Mockup Page 5)
 // ----------------------------------------------------
 function renderCultivosView() {
+  const cultivos = getVisibleRecords(state.cultivos);
+  const isClient = state.currentRole === 'cliente';
   return `
     <div class="space-y-5">
       <!-- Header -->
@@ -2124,12 +2235,13 @@ function renderCultivosView() {
           </p>
         </div>
 
-        <button onclick="window.openNewCultivoModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+        ${isClient ? '' : `<button onclick="window.openNewCultivoModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2 self-start sm:self-auto">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>Registrar cultivo</span>
-        </button>
+        </button>`}
       </div>
 
+      ${isClient ? '' : `
       <!-- Filters Toolbar (Page 5) -->
       <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex flex-wrap items-center gap-2">
@@ -2174,6 +2286,7 @@ function renderCultivosView() {
           </button>
         </div>
       </div>
+      `}
 
       <!-- Main Layout: Table (Left) + Comparative Bar Graphic (Right - Page 5) -->
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -2194,12 +2307,14 @@ function renderCultivosView() {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                ${state.cultivos.map(c => {
+                ${cultivos.length ? cultivos.map(c => {
                   const estadoBadge = c.estado === 'Saludable'
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     : c.estado === 'Advertencia'
                       ? 'bg-amber-50 text-amber-700 border-amber-200'
                       : 'bg-rose-50 text-rose-700 border-rose-200';
+                  const lote = state.lotes.find(item => item.id === c.loteId);
+                  const fincaNombre = getFincaNombreForLote(lote) || c.fincaNombre;
 
                   return `
                     <tr class="hover:bg-slate-50/70 transition-colors">
@@ -2210,7 +2325,7 @@ function renderCultivosView() {
                         <span class="block text-[10px] text-slate-400 font-normal">${c.variedad}</span>
                       </td>
                       <td class="p-3.5 text-slate-600">${c.tipoCultivo}</td>
-                      <td class="p-3.5 text-slate-600">${c.fincaNombre}</td>
+                      <td class="p-3.5 text-slate-600">${fincaNombre}</td>
                       <td class="p-3.5 font-mono text-slate-700">${c.loteNombre}</td>
                       <td class="p-3.5 font-mono text-slate-500">${c.fechaSiembra}</td>
                       <td class="p-3.5">
@@ -2224,14 +2339,14 @@ function renderCultivosView() {
                           <button onclick="window.switchView('ficha_cultivo', '${c.id}')" class="p-1 text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors" title="Ver ficha de cultivo" aria-label="Ver ficha de ${c.nombre}">
                             <i data-lucide="eye" class="w-4 h-4"></i>
                           </button>
-                          <button onclick="window.editCultivoModal('${c.id}')" class="p-1 text-slate-400 hover:text-indigo-600 rounded-lg" title="Editar Cultivo (RF-019)">
+                          ${isClient ? '' : `<button onclick="window.editCultivoModal('${c.id}')" class="p-1 text-slate-400 hover:text-indigo-600 rounded-lg" title="Editar Cultivo (RF-019)">
                             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                          </button>
+                          </button>`}
                         </div>
                       </td>
                     </tr>
                   `;
-                }).join('')}
+                }).join('') : '<tr><td colspan="8" class="p-5 text-center text-slate-500">No hay cultivos registrados para esta finca.</td></tr>'}
               </tbody>
             </table>
           </div>
@@ -2244,57 +2359,23 @@ function renderCultivosView() {
             <p class="text-[11px] text-slate-400 mt-0.5">Vigor y distribución por lote</p>
           </div>
 
-          <!-- Mini Bar Chart -->
           <div class="space-y-3 pt-1">
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-semibold text-slate-700">Tomate (Lote B)</span>
-                <span class="text-amber-600 font-bold font-mono">35% Hum</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-amber-400 h-2 rounded-full" style="width: 35%"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-semibold text-slate-700">Café (Lote A)</span>
-                <span class="text-emerald-600 font-bold font-mono">62% Hum</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-emerald-500 h-2 rounded-full" style="width: 62%"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-semibold text-slate-700">Maíz (Lote C)</span>
-                <span class="text-emerald-600 font-bold font-mono">58% Hum</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-emerald-500 h-2 rounded-full" style="width: 58%"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-semibold text-slate-700">Cacao (Lote D)</span>
-                <span class="text-emerald-600 font-bold font-mono">60% Hum</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-emerald-500 h-2 rounded-full" style="width: 60%"></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-semibold text-slate-700">Papa (Lote E)</span>
-                <span class="text-rose-600 font-bold font-mono">28% Hum</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2">
-                <div class="bg-rose-500 h-2 rounded-full" style="width: 28%"></div>
-              </div>
-            </div>
+            ${cultivos.length ? cultivos.slice(0, 5).map(cultivo => {
+              const lote = state.lotes.find(item => item.id === cultivo.loteId);
+              const humedad = Number(cultivo.humedad ?? lote?.humedadSuelo ?? 0);
+              const color = humedad < 40 ? 'bg-amber-400' : 'bg-emerald-500';
+              return `
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-semibold text-slate-700">${cultivo.nombre} (${cultivo.loteNombre})</span>
+                    <span class="text-slate-600 font-bold font-mono">${humedad}% Hum</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div class="${color} h-2 rounded-full" style="width: ${Math.max(0, Math.min(100, humedad))}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join('') : '<p class="text-xs text-slate-500">No hay cultivos registrados para esta finca.</p>'}
           </div>
         </div>
       </div>
@@ -2306,7 +2387,23 @@ function renderCultivosView() {
 // SCREEN 5: FICHA DE CULTIVO (Mockup Page 6)
 // ----------------------------------------------------
 function renderFichaCultivoView() {
-  const c = state.cultivos.find(item => item.id === state.selectedCultivoId) || state.cultivos[0];
+  const cultivos = getVisibleRecords(state.cultivos);
+  const c = cultivos.find(item => item.id === state.selectedCultivoId) || cultivos[0];
+  if (!c) {
+    return '<div class="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">No hay cultivos registrados para esta finca.</div>';
+  }
+  const cultivoLote = state.lotes.find(item => item.id === c.loteId);
+  const fincaNombre = getFincaNombreForLote(cultivoLote) || c.fincaNombre;
+  const isClient = state.currentRole === 'cliente';
+  const actividades = getVisibleRecords(state.actividades).filter(item =>
+    item.cultivoId === c.id || item.loteId === c.loteId || item.loteId === c.loteNombre
+  );
+  const alertas = getVisibleRecords(state.alertas).filter(alerta => {
+    const referenciaLote = alerta.loteId || alerta.lote;
+    return referenciaLote === c.loteId ||
+      referenciaLote === c.loteNombre ||
+      String(referenciaLote || '').startsWith(`${c.loteNombre} (`);
+  });
 
   return `
     <div class="space-y-6">
@@ -2321,7 +2418,7 @@ function renderFichaCultivoView() {
             </span>
           </div>
           <p class="text-xs text-slate-500">
-            ${c.fincaNombre} · ${c.loteNombre} · Variedad: <strong>${c.variedad}</strong>
+            ${fincaNombre} · ${c.loteNombre} · Variedad: <strong>${c.variedad}</strong>
           </p>
         </div>
 
@@ -2331,15 +2428,15 @@ function renderFichaCultivoView() {
             <span>Volver a lista</span>
           </button>
 
-          <button onclick="window.editCultivoModal('${c.id}')" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5">
+          ${isClient ? '' : `<button onclick="window.editCultivoModal('${c.id}')" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5">
             <i data-lucide="edit-3" class="w-4 h-4"></i>
             <span>Editar</span>
-          </button>
+          </button>`}
 
-          <button onclick="window.openNewActividadModal('${c.id}')" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5">
+          ${isClient ? '' : `<button onclick="window.openNewActividadModal('${c.id}')" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Registrar actividad</span>
-          </button>
+          </button>`}
         </div>
       </div>
 
@@ -2436,18 +2533,12 @@ function renderFichaCultivoView() {
             Actividades recientes
           </h4>
           <div class="space-y-2 text-xs">
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-              <span class="font-semibold text-slate-800">· Riego aplicado</span>
-              <span class="text-slate-400 font-mono">hoy 08:15</span>
-            </div>
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-              <span class="font-semibold text-slate-800">· Fertilización</span>
-              <span class="text-slate-400 font-mono">ayer 14:30</span>
-            </div>
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-              <span class="font-semibold text-slate-800">· Inspección visual</span>
-              <span class="text-slate-400 font-mono">3 días atrás</span>
-            </div>
+            ${actividades.length ? actividades.slice(0, 5).map(activity => `
+              <div class="flex items-center justify-between gap-3 p-2 rounded-lg bg-slate-50">
+                <span class="font-semibold text-slate-800">${activity.tipoActividad} · ${activity.descripcion}</span>
+                <span class="shrink-0 text-slate-400 font-mono">${activity.fecha}</span>
+              </div>
+            `).join('') : '<p class="text-slate-500">No hay actividades registradas para este cultivo.</p>'}
           </div>
         </div>
 
@@ -2458,14 +2549,12 @@ function renderFichaCultivoView() {
             Alertas relacionadas
           </h4>
           <div class="space-y-2 text-xs">
-            <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200">
-              <p class="font-bold text-amber-900">· Baja humedad del suelo en Lote B</p>
-              <p class="text-[11px] text-amber-800 mt-0.5">Riego recomendado en las próximas 24 horas para evitar estrés hídrico.</p>
-            </div>
-            <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200">
-              <p class="font-bold text-amber-900">· Monitoreo diario sugerido</p>
-              <p class="text-[11px] text-amber-800 mt-0.5">Estado Advertencia activado preventivamente por oscilación térmica.</p>
-            </div>
+            ${alertas.length ? alertas.slice(0, 5).map(alerta => `
+              <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200">
+                <p class="font-bold text-amber-900">${alerta.titulo}</p>
+                <p class="text-[11px] text-amber-800 mt-0.5">${alerta.detalle}</p>
+              </div>
+            `).join('') : '<p class="text-slate-500">No hay alertas para esta finca.</p>'}
           </div>
         </div>
       </div>
@@ -2477,6 +2566,8 @@ function renderFichaCultivoView() {
 // OTHER MODULE VIEWS: SENSORES, CLIMA, ALERTAS, ETC.
 // ----------------------------------------------------
 function renderSensoresView() {
+  const sensores = getVisibleRecords(state.sensores);
+  const isClient = state.currentRole === 'cliente';
   return `
     <div class="space-y-5">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -2484,14 +2575,14 @@ function renderSensoresView() {
           <h1 class="text-2xl font-bold tracking-tight text-slate-900">Red de Sensores IoT</h1>
           <p class="text-xs text-slate-500 mt-0.5">Telemetría en tiempo real y estado de baterías por lote.</p>
         </div>
-        <button onclick="window.openNewSensorModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2">
+        ${isClient ? '' : `<button onclick="window.openNewSensorModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>Registrar Sensor</span>
-        </button>
+        </button>`}
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        ${state.sensores.map(s => `
+        ${sensores.length ? sensores.map(s => `
           <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-mono font-bold text-slate-400">${s.codigo}</span>
@@ -2512,7 +2603,7 @@ function renderSensoresView() {
               <span>${s.senal}</span>
             </div>
           </div>
-        `).join('')}
+        `).join('') : '<p class="col-span-full rounded-xl border border-slate-200 bg-white p-5 text-xs text-slate-500">No hay sensores registrados para esta finca.</p>'}
       </div>
     </div>
   `;
@@ -2553,6 +2644,8 @@ function renderClimaView() {
 }
 
 function renderAlertasView() {
+  const alertas = getVisibleRecords(state.alertas);
+  const isClient = state.currentRole === 'cliente';
   return `
     <div class="space-y-5">
       <div>
@@ -2561,7 +2654,7 @@ function renderAlertasView() {
       </div>
 
       <div class="space-y-3">
-        ${state.alertas.map(a => `
+        ${alertas.length ? alertas.map(a => `
           <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs flex items-start justify-between gap-4">
             <div class="flex items-start gap-3">
               <span class="w-3 h-3 rounded-full mt-1.5 ${a.severidad === 'Advertencia' ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
@@ -2576,17 +2669,19 @@ function renderAlertasView() {
                 <p class="text-[11px] text-slate-400 mt-2 font-mono">Ubicación: ${a.lote} · Registrado: ${a.fecha}</p>
               </div>
             </div>
-            <button onclick="window.resolverAlerta('${a.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl whitespace-nowrap">
+            ${isClient ? '' : `<button onclick="window.resolverAlerta('${a.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl whitespace-nowrap">
               Marcar Atendida
-            </button>
+            </button>`}
           </div>
-        `).join('')}
+        `).join('') : '<p class="rounded-xl border border-slate-200 bg-white p-5 text-xs text-slate-500">No hay alertas para esta finca.</p>'}
       </div>
     </div>
   `;
 }
 
 function renderActividadesView() {
+  const actividades = getVisibleRecords(state.actividades);
+  const isClient = state.currentRole === 'cliente';
   return `
     <div class="space-y-5">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -2594,10 +2689,10 @@ function renderActividadesView() {
           <h1 class="text-2xl font-bold tracking-tight text-slate-900">Bitácora de Actividades Agrícolas</h1>
           <p class="text-xs text-slate-500 mt-0.5">Registro cronológico de riego, fertilización, podas y labores fitosanitarias.</p>
         </div>
-        <button onclick="window.openNewActividadModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2">
+        ${isClient ? '' : `<button onclick="window.openNewActividadModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>Registrar Actividad</span>
-        </button>
+        </button>`}
       </div>
 
       <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
@@ -2614,7 +2709,7 @@ function renderActividadesView() {
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            ${state.actividades.map(a => `
+            ${actividades.length ? actividades.map(a => `
               <tr class="hover:bg-slate-50/70 transition-colors">
                 <td class="p-3.5 font-bold text-slate-900">${a.tipoActividad}</td>
                 <td class="p-3.5 text-slate-600">${a.loteId}</td>
@@ -2627,7 +2722,7 @@ function renderActividadesView() {
                   </span>
                 </td>
               </tr>
-            `).join('')}
+            `).join('') : '<tr><td colspan="6" class="p-5 text-center text-slate-500">No hay actividades registradas para esta finca.</td></tr>'}
           </tbody>
         </table>
         </div>
@@ -2637,6 +2732,8 @@ function renderActividadesView() {
 }
 
 function renderProduccionView() {
+  const produccion = getVisibleRecords(state.produccion);
+  const isClient = state.currentRole === 'cliente';
   return `
     <div class="space-y-5">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -2645,14 +2742,14 @@ function renderProduccionView() {
           <p class="text-xs text-slate-500 mt-0.5">Control de cosechas, rendimientos por hectárea y compradores de destino.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="window.exportCSVAction()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl flex items-center gap-1.5">
+          ${isClient ? '' : `<button onclick="window.exportCSVAction()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl flex items-center gap-1.5">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Exportar CSV</span>
-          </button>
-          <button onclick="window.openNewProduccionModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2">
+          </button>`}
+          ${isClient ? '' : `<button onclick="window.openNewProduccionModal()" class="px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-2">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Registrar Cosecha</span>
-          </button>
+          </button>`}
         </div>
       </div>
 
@@ -2667,11 +2764,11 @@ function renderProduccionView() {
               <th class="p-3.5">Rendimiento</th>
               <th class="p-3.5">Calidad</th>
               <th class="p-3.5">Comprador Destino</th>
-              <th class="p-3.5 text-right">Acción (RF-034)</th>
+              ${isClient ? '' : '<th class="p-3.5 text-right">Acción (RF-034)</th>'}
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            ${state.produccion.map(p => `
+            ${produccion.length ? produccion.map(p => `
               <tr class="hover:bg-slate-50/70 transition-colors">
                 <td class="p-3.5 font-mono text-slate-500">${p.fechaCosecha}</td>
                 <td class="p-3.5 font-bold text-slate-900">${p.loteId}</td>
@@ -2679,13 +2776,13 @@ function renderProduccionView() {
                 <td class="p-3.5 font-mono text-slate-700">${p.rendimientoHa ? p.rendimientoHa.toFixed(1) : '—'} Kg/Ha</td>
                 <td class="p-3.5 text-slate-600">${p.calidad}</td>
                 <td class="p-3.5 text-slate-600">${p.compradorDestino}</td>
-                <td class="p-3.5 text-right">
+                ${isClient ? '' : `<td class="p-3.5 text-right">
                   <button onclick="window.editProduccionModal('${p.id}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-emerald-800 rounded-lg transition-colors" title="Actualizar producción" aria-label="Actualizar producción de ${p.loteId}">
                     <i data-lucide="edit-3" class="w-4 h-4 text-emerald-600"></i>
                   </button>
-                </td>
+                </td>`}
               </tr>
-            `).join('')}
+            `).join('') : `<tr><td colspan="${isClient ? 6 : 7}" class="p-5 text-center text-slate-500">No hay cosechas registradas para esta finca.</td></tr>`}
           </tbody>
         </table>
         </div>
@@ -3112,8 +3209,12 @@ window.openFincaDetailModal = function(fincaId) {
   const container = document.getElementById('modal-container');
   if (!container) return;
 
-  const f = state.fincas.find(item => item.id === fincaId) || state.fincas[0];
+  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
+  const f = state.fincas.find(item => item.id === fincaId);
   if (!f) return;
+  const isClient = state.currentRole === 'cliente';
+  const cultivoCount = getRecordsForFinca(state.cultivos, f.id).length;
+  const sensorCount = getRecordsForFinca(state.sensores, f.id).length;
 
   const isSelected = f.id === state.selectedFincaId;
   const statusClass = f.estado.includes('Saludable')
@@ -3122,10 +3223,7 @@ window.openFincaDetailModal = function(fincaId) {
       ? 'bg-amber-50 text-amber-700 border-amber-200'
       : 'bg-rose-50 text-rose-700 border-rose-200';
 
-  let fincaLotes = state.lotes.filter(l => l.terrenoId === f.id);
-  if (fincaLotes.length === 0) {
-    fincaLotes = state.lotes.slice(0, 3);
-  }
+  const fincaLotes = state.getLotesForFinca(f.id);
 
   const bodyHTML = `
     <div class="space-y-5">
@@ -3164,11 +3262,11 @@ window.openFincaDetailModal = function(fincaId) {
         </div>
         <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cultivos</span>
-          <p class="text-lg font-black text-slate-900 font-mono mt-0.5">${f.cultivosActivos} Activos</p>
+          <p class="text-lg font-black text-slate-900 font-mono mt-0.5">${isClient ? cultivoCount : f.cultivosActivos} Activos</p>
         </div>
         <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sensores IoT</span>
-          <p class="text-lg font-black text-slate-900 font-mono mt-0.5">${f.sensoresActivos} Online</p>
+          <p class="text-lg font-black text-slate-900 font-mono mt-0.5">${isClient ? sensorCount : f.sensoresActivos} Online</p>
         </div>
         <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Salud Finca</span>
@@ -3185,6 +3283,7 @@ window.openFincaDetailModal = function(fincaId) {
         <p class="text-slate-600 text-[11px] leading-relaxed">
           ${f.descripcion || 'Predio tecnificado registrado en la plataforma AgroControl con telemetría continua.'}
         </p>
+        <p class="text-slate-600 text-[11px]"><strong>Producto principal:</strong> ${escapeHtml(f.productoPrincipal || 'No indicado')}</p>
       </div>
 
       <!-- Lotes en esta Finca -->
@@ -3227,10 +3326,10 @@ window.openFincaDetailModal = function(fincaId) {
             <span>Ver en Terrenos y Lotes</span>
           </button>
 
-          <button type="button" onclick="window.selectFincaAndClose('${f.id}')" class="flex-1 sm:flex-none px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5">
+          ${state.currentRole === 'cliente' ? '' : `<button type="button" onclick="window.selectFincaAndClose('${f.id}')" class="flex-1 sm:flex-none px-4 py-2 bg-[#1B794B] hover:bg-[#166534] text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5">
             <i data-lucide="check" class="w-3.5 h-3.5"></i>
             <span>${isSelected ? 'Finca ya activa' : 'Seleccionar como Activa'}</span>
-          </button>
+          </button>`}
         </div>
       </div>
     </div>
@@ -3241,6 +3340,7 @@ window.openFincaDetailModal = function(fincaId) {
 };
 
 window.selectFincaAndClose = function(fincaId) {
+  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
   state.selectedFincaId = fincaId;
   const fincaLotes = state.getLotesForFinca(fincaId);
   if (fincaLotes.length > 0) {
@@ -3253,6 +3353,7 @@ window.selectFincaAndClose = function(fincaId) {
 };
 
 window.selectFincaAndGoToTerrenos = function(fincaId) {
+  if (state.currentRole === 'cliente' && fincaId !== state.currentUser.fincaId) return;
   state.selectedFincaId = fincaId;
   const fincaLotes = state.getLotesForFinca(fincaId);
   if (fincaLotes.length > 0) {
@@ -3266,6 +3367,7 @@ window.selectFincaAndGoToTerrenos = function(fincaId) {
 
 
 window.openNewFincaModal = function() {
+  if (state.currentRole === 'cliente') return;
   const container = document.getElementById('modal-container');
   if (!container) return;
 
@@ -3302,6 +3404,7 @@ window.openNewFincaModal = function() {
 
 window.saveNewFincaSubmit = function(event) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const nombre = document.getElementById('new-finca-nombre').value.trim();
   const ubicacion = document.getElementById('new-finca-ubicacion').value.trim();
@@ -3333,6 +3436,7 @@ window.saveNewFincaSubmit = function(event) {
 };
 
 window.openNewLoteModal = function() {
+  if (state.currentRole === 'cliente') return;
   const container = document.getElementById('modal-container');
   if (!container) return;
 
@@ -3366,6 +3470,7 @@ window.openNewLoteModal = function() {
 
 window.saveNewLoteSubmit = function(event) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const identificador = document.getElementById('new-lote-id').value.trim();
   const cultivoNombre = document.getElementById('new-lote-cultivo').value.trim();
@@ -3429,6 +3534,7 @@ function openRegistrationModal(title, icon, formHTML) {
 }
 
 window.openNewCultivoModal = function() {
+  if (state.currentRole === 'cliente') return;
   const lotes = state.getLotesForFinca(state.selectedFincaId);
   const today = getTodayDate();
   const bodyHTML = `
@@ -3497,6 +3603,7 @@ window.openNewCultivoModal = function() {
 
 window.saveNewCultivoSubmit = function(event) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const form = event.currentTarget;
   const lote = state.getLotesForFinca(state.selectedFincaId).find(item => item.id === form.elements.loteId.value);
@@ -3536,6 +3643,7 @@ window.saveNewCultivoSubmit = function(event) {
 };
 
 window.openNewActividadModal = function(cultivoId = '') {
+  if (state.currentRole === 'cliente') return;
   const cultivo = state.cultivos.find(item => item.id === cultivoId);
   const loteInicial = cultivo?.loteId || state.selectedLoteId;
   const bodyHTML = `
@@ -3581,6 +3689,7 @@ window.openNewActividadModal = function(cultivoId = '') {
 
 window.saveNewActividadSubmit = function(event) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const form = event.currentTarget;
   const lote = state.lotes.find(item => item.id === form.elements.loteId.value) ||
@@ -3611,6 +3720,7 @@ window.saveNewActividadSubmit = function(event) {
 };
 
 window.openNewSensorModal = function() {
+  if (state.currentRole === 'cliente') return;
   const bodyHTML = `
     <form novalidate onsubmit="window.saveNewSensorSubmit(event)" class="space-y-4">
       ${renderFarmNameField('new-sensor-finca')}
@@ -3655,6 +3765,7 @@ window.openNewSensorModal = function() {
 
 window.saveNewSensorSubmit = function(event) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const form = event.currentTarget;
   const codigo = form.elements.codigo.value.trim();
@@ -3692,6 +3803,7 @@ window.saveNewSensorSubmit = function(event) {
 };
 
 window.openNewProduccionModal = function() {
+  if (state.currentRole === 'cliente') return;
   const bodyHTML = `
     <form novalidate onsubmit="window.saveNewProduccionSubmit(event)" class="space-y-4">
       ${renderFarmNameField('new-prod-finca')}
@@ -3732,6 +3844,7 @@ window.openNewProduccionModal = function() {
 
 window.saveNewProduccionSubmit = function(event) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const form = event.currentTarget;
   const lote = state.getLotesForFinca(state.selectedFincaId).find(item => item.id === form.elements.loteId.value);
@@ -3763,6 +3876,7 @@ window.saveNewProduccionSubmit = function(event) {
 };
 
 window.openProgramarRiegoModal = function(loteNombre) {
+  if (state.currentRole === 'cliente') return;
   const container = document.getElementById('modal-container');
   if (!container) return;
 
@@ -3795,6 +3909,7 @@ window.openProgramarRiegoModal = function(loteNombre) {
 
 window.saveProgramarRiegoSubmit = function(event, loteNombre) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const lote = state.getLotesForFinca(state.selectedFincaId).find(item => item.identificador === loteNombre);
   if (!lote) {
@@ -3826,6 +3941,7 @@ window.saveProgramarRiegoSubmit = function(event, loteNombre) {
 
 // Update Producción Modal (RF-034 preserved)
 window.editProduccionModal = function(prodId) {
+  if (state.currentRole === 'cliente') return;
   const container = document.getElementById('modal-container');
   if (!container) return;
 
@@ -3876,6 +3992,7 @@ window.editProduccionModal = function(prodId) {
 
 window.updateProduccionSubmit = function(event, prodId) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const prod = state.produccion.find(p => p.id === prodId);
   if (!prod) return;
@@ -3894,6 +4011,7 @@ window.updateProduccionSubmit = function(event, prodId) {
 
 // Update Cultivo Modal (RF-019 preserved)
 window.editCultivoModal = function(cultivoId) {
+  if (state.currentRole === 'cliente') return;
   const container = document.getElementById('modal-container');
   if (!container) return;
 
@@ -3944,6 +4062,7 @@ window.editCultivoModal = function(cultivoId) {
 
 window.updateCultivoSubmit = function(event, cultivoId) {
   event.preventDefault();
+  if (state.currentRole === 'cliente') return;
   if (!validateForm(event)) return;
   const c = state.cultivos.find(item => item.id === cultivoId);
   if (!c) return;
@@ -3963,7 +4082,7 @@ window.updateCultivoSubmit = function(event, cultivoId) {
 
 window.exportCSVAction = function() {
   let csv = "Fecha,Lote,Cantidad,Unidad,Comprador\n";
-  state.produccion.forEach(p => {
+  getVisibleRecords(state.produccion).forEach(p => {
     csv += `${p.fechaCosecha},${p.loteId},${p.cantidad},${p.unidadMedida},${p.compradorDestino}\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -3975,6 +4094,7 @@ window.exportCSVAction = function() {
 };
 
 window.resolverAlerta = function(alertaId) {
+  if (state.currentRole === 'cliente') return;
   state.alertas = state.alertas.filter(a => a.id !== alertaId);
   state.save();
   renderHeader();
